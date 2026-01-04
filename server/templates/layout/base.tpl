@@ -9,9 +9,9 @@
     </head>
     <body>
         <header>
-            <h1 class="menu-item"><a href='/'>Hister</a></h1
-            ><a class="menu-item" href="/rules">Rules</a
-            ><a class="menu-item" href="/add">Add</a>
+            <h1 class="menu-item"><img src="/static/logo.png" /> <a href='/'>Hister</a></h1>
+            <a class="menu-item" href="/rules">Rules</a>
+            <a class="menu-item" href="/add">Add</a>
         </header>
         <main>
             {{ template "main" . }}

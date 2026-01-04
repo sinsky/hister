@@ -32,11 +32,17 @@ type Query struct {
 }
 
 type Document struct {
-	URL     string `json:"url"`
-	HTML    string `json:"html"`
-	Title   string `json:"title"`
-	Text    string `json:"text"`
-	Favicon string `json:"favicon"`
+	URL     string  `json:"url"`
+	HTML    string  `json:"html"`
+	Title   string  `json:"title"`
+	Text    string  `json:"text"`
+	Favicon string  `json:"favicon"`
+	Score   float64 `json:"score"`
+}
+
+type Results struct {
+	Total     uint64      `json:"total"`
+	Documents []*Document `json:"documents"`
 }
 
 var i *indexer
@@ -60,7 +66,7 @@ func Add(d *Document) error {
 	return i.idx.Index(d.URL, d)
 }
 
-func Search(cfg *config.Config, q *Query) ([]*Document, error) {
+func Search(cfg *config.Config, q *Query) (*Results, error) {
 	q.cfg = cfg
 	req := bleve.NewSearchRequest(q.create())
 	req.Fields = append(q.Fields, "favicon")
@@ -92,7 +98,11 @@ func Search(cfg *config.Config, q *Query) ([]*Document, error) {
 		}
 		matches[j] = d
 	}
-	return matches, nil
+	r := &Results{
+		Total:     res.Total,
+		Documents: matches,
+	}
+	return r, nil
 }
 
 func (d *Document) Process() error {

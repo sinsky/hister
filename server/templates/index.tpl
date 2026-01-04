@@ -2,9 +2,11 @@
 <div class="search">
     <input type="text" autofocus placeholder="Search..." id="search" />
 </div>
-<div id="results" class="container"></div>
-<div id="logo" class="title container">
-<img src="/static/logo.png" />
+<div class="container">
+    <div id="results-header" class="hidden">
+        <div>Total number of results: <span class="results-num"></span></div>
+    </div>
+    <div id="results"></div>
 </div>
 <template id="result">
     <div class="result">

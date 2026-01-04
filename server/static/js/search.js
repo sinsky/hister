@@ -1,7 +1,7 @@
 let ws;
 let input = document.getElementById("search");
 let results = document.getElementById("results");
-let logo = document.getElementById("logo");
+let resultsHeader = document.getElementById("results-header");
 let emptyImg = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
 let templates = {
     "result": document.getElementById("result"),
@@ -54,11 +54,12 @@ function updateURL() {
 }
 
 function renderResults(event) {
-    var d = JSON.parse(event.data);
+    resultsHeader.classList.add("hidden");
+    const res = JSON.parse(event.data);
     results.innerHTML = "";
+    const d = res.documents;
     if(!d || !d.length) {
         if(!input.value) {
-			logo.classList.remove("hidden");
             return
         }
         let u = "https://google.com/search?q="+escape(input.value);
@@ -70,8 +71,9 @@ function renderResults(event) {
         return;
     }
     highlightIdx = 0;
+    resultsHeader.querySelector(".results-num").innerText = res.total;
+    resultsHeader.classList.remove("hidden");
     for(let i in d) {
-		logo.classList.add("hidden");
         let r = d[i];
         let n = createTemplate("result", {
             "a": (e) => { e.setAttribute("href", r.url); e.innerHTML = r.title || "*title*"; },
