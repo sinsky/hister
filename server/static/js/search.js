@@ -47,7 +47,7 @@ function sendQuery(q) {
 
 function updateURL() {
     if(input.value) {
-        history.replaceState(urlState, "", `${window.location.pathname}?q=${input.value}`);
+        history.replaceState(urlState, "", `${window.location.pathname}?q=${encodeURIComponent(input.value)}`);
         return;
     }
     history.replaceState(urlState, "", `${window.location.pathname}`);
