@@ -6,13 +6,20 @@ Blazing fast lookup of previously visited websites.
 
 ![hister screencast](assets/demo.gif)
 
+## Features
+
+ - Advanced [query language](https://blevesearch.com/docs/Query-String-Query/)
+ - Blacklist & priority URL rules
+ - Search keyword aliases for faster content retrieval
+ - Web extension to automatically index visited websites
+
 ## Setup & run
 
  - Clone the repository
  - Build with `go build`
  - Run `./hister help` to list the available commands
  - Execute `./hister listen` to start the web application
- - Install the addon for automatic indexing
+ - Install the extension: [chrome](https://chromewebstore.google.com/detail/hister/cciilamhchpmbdnniabclekddabkifhb)
 
 
 ## Configuration
