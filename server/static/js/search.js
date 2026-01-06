@@ -62,9 +62,9 @@ function renderResults(event) {
         if(!input.value) {
             return
         }
-        let u = "https://google.com/search?q="+escape(input.value);
+        let u = getSearchUrl(input.value)
         let n = createTemplate("result", {
-            "a": (e) => { e.setAttribute("href", u); e.innerHTML = "No results found - search on Google"; e.classList.add("error"); },
+            "a": (e) => { e.setAttribute("href", u); e.innerHTML = "No results found - open query in web search engine"; e.classList.add("error"); },
             "span": (e) => { e.textContent = u; },
         });
         results.appendChild(n);
@@ -92,6 +92,10 @@ input.addEventListener("input", () => {
     sendQuery(input.value);
 });
 
+function getSearchUrl(query) {
+    return document.querySelector("#search-url").value.replace("{query}", escape(query));
+}
+
 let highlightIdx = 0;
 window.addEventListener("keydown", function(e) {
     if(e.key == "Enter") {
@@ -107,7 +111,6 @@ window.addEventListener("keydown", function(e) {
           results.children[highlightIdx].classList.add("highlight");
     }
     if(e.ctrlKey && e.key == "o") {
-        let u = document.querySelector("#search-url").value.replace("{query}", escape(input.value));
-        window.open(u, "_blank");
+        window.open(getSearchUrl(input.value), "_blank");
     }
 });
