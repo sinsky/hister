@@ -1,7 +1,8 @@
 :root {
-	--color-dark: rgb(16, 14, 27);
-	--color-semidark: rgb(39, 35, 57);
-	--color-light: rgb(255, 246, 230);
+	--color-dark: rgb(10, 10, 18);
+	--color-semidark: rgb(34, 36, 44);
+	--color-grey: rgb(79, 75, 79);
+	--color-light: #fafaff;
 	--color-semilight: #95a5a6;
     --color-blue: #3498db;
     --color-purple: #cb89f6;
@@ -95,7 +96,8 @@ input, textarea {
     color: var(--color-light);
     padding: 0.4em;
     margin-bottom: 0.4em;
-    border: 2px solid var(--color-light);
+    border: 2px solid var(--color-grey);
+    border-radius: 0.4em;
 }
 
 input[type=submit] {
@@ -125,16 +127,24 @@ table {
     width: 100%;
     td, th {
         padding: 0.5em;
-        border: 1px solid var(--color-light);
+        border: 1px solid var(--color-grey);
         text-align: center;
     }
 }
 
+code {
+    background-color: var(--color-grey);
+    padding: 0 0.2em;
+}
 
 .container {
     max-width: 70em;
     margin: auto;
     margin-top: 1em;
+    padding: 1em 2em;
+    background-color: var(--color-semidark);
+    border: 1px solid var(--color-grey);
+    border-radius: 0.4em;
 }
 
 .box {
@@ -164,7 +174,6 @@ table {
 
 .search {
     margin-top: 1em;
-    text-align: center;
     input {
         width: 80%;
         font-size: 2em;
@@ -222,7 +231,7 @@ table {
 }
 
 .highlight {
-    background: var(--color-semidark);
+    background: var(--color-grey);
 }
 
 .error {
@@ -236,6 +245,15 @@ table {
 .mv-1 {
     margin-top: 1em;
     margin-bottom: 1em;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.center-align {
+    margin-left: auto;
+    margin-right: auto;
 }
 
 mark {

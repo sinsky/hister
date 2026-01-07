@@ -5,6 +5,7 @@ let resultsHeader = document.getElementById("results-header");
 let emptyImg = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
 let templates = {
     "result": document.getElementById("result"),
+    "tips": document.getElementById("tips"),
 };
 let urlState = {};
 
@@ -56,11 +57,12 @@ function updateURL() {
 function renderResults(event) {
     resultsHeader.classList.add("hidden");
     const res = JSON.parse(event.data);
-    results.innerHTML = "";
+    results.replaceChildren();
     resultsHeader.querySelector(".expanded-query").innerHTML = "";
     const d = res.documents;
     if(!d || !d.length) {
         if(!input.value) {
+            results.replaceChildren(createTemplate("tips", {}));
             return
         }
         let u = getSearchUrl(input.value)
@@ -89,8 +91,6 @@ function renderResults(event) {
     }
 };
 
-connect();
-
 input.addEventListener("input", () => {
     updateURL();
     sendQuery(input.value);
@@ -102,6 +102,11 @@ function getSearchUrl(query) {
 
 function openUrl(u) {
     window.location.href = u;
+}
+
+function init() {
+    results.replaceChildren(createTemplate("tips", {}));
+    connect();
 }
 
 let highlightIdx = 0;
@@ -123,3 +128,5 @@ window.addEventListener("keydown", function(e) {
         openUrl(getSearchUrl(input.value));
     }
 });
+
+init();

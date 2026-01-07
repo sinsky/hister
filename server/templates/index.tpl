@@ -1,5 +1,5 @@
 {{ define "main" }}
-<div class="search">
+<div class="search text-center">
     <input type="text" autofocus placeholder="Search..." id="search" />
 </div>
 <div class="container">
@@ -15,6 +15,14 @@
         <span class="result-url"></span>
         <p class="result-content"></p>
     </div>
+</template>
+<template id="tips">
+<div class="text-center">
+    <b>Tips</b><br />
+    Use <code>*</code> for partial match.<br />
+    Prefixing word with <code>+</code> makes it mandatory.<br />
+    Prefixing word with <code>-</code> excludes matching documents.
+</div>
 </template>
 <input type="hidden" id="ws-url" value="{{ .Config.WebSocketURL }}" />
 <input type="hidden" id="search-url" value="{{ .Config.App.SearchURL }}" />
