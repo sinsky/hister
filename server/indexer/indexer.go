@@ -128,6 +128,43 @@ func (d *Document) Process() error {
 	return nil
 }
 
+func Iterate(fn func(*Document)) {
+	q := query.NewMatchAllQuery()
+	resultNum := 20
+	page := 0
+	fields := []string{"url", "title", "text", "favicon", "html"}
+	for {
+		req := bleve.NewSearchRequest(q)
+		req.Size = resultNum
+		req.From = page * resultNum
+		req.Fields = fields
+		res, err := i.idx.Search(req)
+		if err != nil || len(res.Hits) < 1 {
+			return
+		}
+		for _, h := range res.Hits {
+			d := &Document{}
+			if s, ok := h.Fields["title"].(string); ok {
+				d.Title = s
+			}
+			if s, ok := h.Fields["url"].(string); ok {
+				d.URL = s
+			}
+			if s, ok := h.Fields["text"].(string); ok {
+				d.Text = s
+			}
+			if s, ok := h.Fields["html"].(string); ok {
+				d.HTML = s
+			}
+			if s, ok := h.Fields["favicon"].(string); ok {
+				d.Favicon = s
+			}
+			fn(d)
+		}
+		page += 1
+	}
+}
+
 func (d *Document) extractHTML() error {
 	// TODO
 	//r := bytes.NewReader(h)

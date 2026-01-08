@@ -67,6 +67,20 @@ var createConfigCmd = &cobra.Command{
 	},
 }
 
+var listURLsCmd = &cobra.Command{
+	Use:   "list-urls",
+	Short: "list indexed URLs",
+	Long:  ``,
+	PreRun: func(_ *cobra.Command, _ []string) {
+		initIndex()
+	},
+	Run: func(cmd *cobra.Command, _ []string) {
+		indexer.Iterate(func(d *indexer.Document) {
+			fmt.Println(d.URL)
+		})
+	},
+}
+
 func exit(errno int, msg string) {
 	if errno != 0 {
 		fmt.Println("Error!")
@@ -82,6 +96,7 @@ func init() {
 
 	rootCmd.AddCommand(listenCmd)
 	rootCmd.AddCommand(createConfigCmd)
+	rootCmd.AddCommand(listURLsCmd)
 
 	dcfg := config.CreateDefaultConfig()
 	listenCmd.Flags().StringP("address", "a", dcfg.Server.Address, "Listen address")
