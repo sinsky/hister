@@ -63,7 +63,7 @@ const addon = {
     entry: {
         background: [srcDir('/background/background.ts')],
         content: [srcDir('/content/content.ts')],
-        popup: [srcDir('/popup/popup.ts'), srcDir('../../server/static/css/style.css')],
+        popup: [srcDir('/popup/popup.ts')],
     },
     output: {
         path: dstDir('/'),
@@ -116,6 +116,10 @@ const addon = {
 						return Buffer.from(JSON.stringify(content));
 					},
                     to: 'manifest_ff.json'
+                },
+                {
+                    from: srcDir('../../server/static/style.css'),
+                    to: 'style.css'
                 },
                 {
                     from: 'assets/icon128.png',

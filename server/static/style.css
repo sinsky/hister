@@ -54,6 +54,10 @@ a:hover, summary:hover {
     text-decoration: underline;
 }
 
+hr {
+   border: 1px solid var(--color-grey);
+}
+
 header {
     border-bottom: 4px solid var(--color-semidark);
     .menu-item {
@@ -95,7 +99,7 @@ input, textarea {
     border-radius: 0.4em;
 }
 
-input[type=submit] {
+input[type=submit], button {
     background: var(--color-semidark);
     color: var(--color-blue);
     border: 2px solid var(--color-blue);
@@ -134,6 +138,7 @@ code, kbd {
 
 .container {
     max-width: 70em;
+    width: 100%;
     margin: auto;
     margin-top: 1em;
     padding: 1em 2em;
