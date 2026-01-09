@@ -24,6 +24,7 @@
             {{ template "main" . }}
         </main>
         <footer>
+            <a href='/about'>About</a> |
             <a href='https://github.com/asciimoo/hister/'>GitHub</a>
         </footer>
     </body>
