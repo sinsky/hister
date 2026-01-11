@@ -197,11 +197,27 @@ func (c *Config) WebSocketURL() string {
 func (c *Config) LoadRules() error {
 	b, err := os.ReadFile(c.RulesPath())
 	if err != nil {
-		return err
+		err = c.SaveRules()
+		if err != nil {
+			return err
+		}
+		b, err = os.ReadFile(c.RulesPath())
+		if err != nil {
+			return err
+		}
 	}
 	err = json.Unmarshal(b, &c.Rules)
 	if err != nil {
 		return err
+	}
+	if c.Rules == nil {
+		c.Rules = &Rules{}
+	}
+	if c.Rules.Skip == nil {
+		c.Rules.Skip = &Rule{ReStrs: make([]string, 0)}
+	}
+	if c.Rules.Priority == nil {
+		c.Rules.Priority = &Rule{ReStrs: make([]string, 0)}
 	}
 	if c.Rules.Aliases == nil {
 		c.Rules.Aliases = make(Aliases)
@@ -215,6 +231,13 @@ func (c *Config) SaveRules() error {
 		return err
 	}
 	defer f.Close()
+	if c.Rules == nil {
+		c.Rules = &Rules{
+			Skip:     &Rule{ReStrs: make([]string, 0)},
+			Priority: &Rule{ReStrs: make([]string, 0)},
+			Aliases:  make(Aliases),
+		}
+	}
 	e := json.NewEncoder(f)
 	e.SetIndent("", "  ")
 	err = e.Encode(c.Rules)
