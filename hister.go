@@ -90,7 +90,8 @@ var indexCmd = &cobra.Command{
 	Short: "index URL",
 	Long:  ``,
 	Args:  cobra.ExactArgs(1),
-	Run: func(_ *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, args []string) {
+		setStrArg(cmd, "server-url", &cfg.Server.BaseURL)
 		u := args[0]
 		client := &http.Client{}
 		req, err := http.NewRequest("GET", u, nil)
@@ -150,6 +151,7 @@ func init() {
 
 	dcfg := config.CreateDefaultConfig()
 	listenCmd.Flags().StringP("address", "a", dcfg.Server.Address, "Listen address")
+	indexCmd.Flags().StringP("server-url", "u", dcfg.Server.BaseURL, "hister server URL")
 
 	cobra.OnInitialize(initialize)
 
