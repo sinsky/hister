@@ -225,8 +225,8 @@ func serveAdd(c *webContext) {
 	} else {
 		log.Debug().Str("url", d.URL).Msg("skip indexing")
 	}
+	c.Response.WriteHeader(http.StatusCreated)
 	if jsonData {
-		c.Response.WriteHeader(http.StatusCreated)
 		return
 	}
 	c.Render("add", nil)
