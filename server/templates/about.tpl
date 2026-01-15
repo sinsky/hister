@@ -6,6 +6,18 @@
 
 <h2>Why Hister?</h2>
 
+<p>Free online search engines constantly losing quality in terms of providing meaningful results without distraction.<br />
+No privacy, AI suggestions, advertisements, sponsored results, indexed AI content and so on.</p>
+
+<p>When we search online it can be because of two reasons:</p>
+<ul>
+    <li>We'd like to <b>find new information</b></li>
+    <li>We'd like to <b>recall information we've read before</b></li>
+</ul>
+<p>Hister provides solution to the latter by indexing all the websites you visit and providing a search interface as efficient as possible, while seamlessly letting you fall back to the traditional search methods in case you need to find unexplored content.</p>
+
+<h2>Features</h2>
+
 <p>Traditional browser history features are limited to basic keyword matching on URLs and page titles. Hister goes beyond these limitations by:
 
 <ul>

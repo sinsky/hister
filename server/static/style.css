@@ -47,6 +47,14 @@ img[src] {
     display: block;
 }
 
+h2 {
+    margin-left: 0.5rem;
+}
+
+p, ul {
+    margin-left: 1rem;
+}
+
 a:visited {
 	color: var(--color-purple);
 }
