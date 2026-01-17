@@ -13,7 +13,7 @@
 <template id="result">
     <div class="result">
         <div class="result-title"><img><a></a></div>
-        <span class="result-url"></span>
+        <span class="result-url"></span><span class="action-button"><svg focusable="false" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path  fill="#95a5a6" d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg></span>
         <p class="result-content"></p>
     </div>
 </template>
@@ -23,6 +23,19 @@
     Use <code>*</code> for partial match.<br />
     Prefixing word with <code>-</code> excludes matching documents.
 </div>
+</template>
+<template id="result-actions">
+<div class="actions bordered padded mt-1">
+    <a class="close float-right">close</a>
+    Prioritize this result for the following query:<br />
+    <input type="text" class="action-query" placeholder="Query.." />
+    <button class="save">Save</button>
+</div>
+</template>
+<template id="success">
+<p class="success">
+    <b>Success!</b> <span class="message"></span>
+</p>
 </template>
 <input type="hidden" id="ws-url" value="{{ .Config.WebSocketURL }}" />
 <input type="hidden" id="search-url" value="{{ .Config.App.SearchURL }}" />

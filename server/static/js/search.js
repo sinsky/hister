@@ -6,6 +6,8 @@ let emptyImg = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAA
 let templates = {
     "result": document.getElementById("result"),
     "tips": document.getElementById("tips"),
+    "result-actions": document.getElementById("result-actions"),
+    "success": document.getElementById("success"),
 };
 let urlState = {};
 
@@ -73,7 +75,7 @@ function renderResults(event) {
         let u = getSearchUrl(input.value)
         let n = createTemplate("result", {
             "a": (e) => { e.setAttribute("href", u); e.innerHTML = "No results found - open query in web search engine"; e.classList.add("error"); },
-            "span": (e) => { e.textContent = u; },
+            ".result-url": (e) => { e.textContent = u; },
         });
         results.appendChild(n);
         return;
@@ -94,7 +96,7 @@ function renderResults(event) {
                     e.addEventListener("click", openResult);
                     e.classList.add("success");
                 },
-                "span": (e) => { e.textContent = r.url; },
+                ".result-url": (e) => { e.textContent = r.url; },
             }));
         }
     }
@@ -107,7 +109,8 @@ function renderResults(event) {
                 e.addEventListener("click", openResult);
             },
             "img": (e) => { e.setAttribute("src", r.favicon || emptyImg); },
-            "span": (e) => { e.textContent = r.url; },
+            ".result-url": (e) => { e.textContent = r.url; },
+            ".action-button": (e) => { e.addEventListener("click", (ev) => toggleActions(ev, e.closest(".result"))) },
             "p": (e) => { e.innerHTML = r.text || ""; },
         });
         results.appendChild(n);
@@ -143,14 +146,55 @@ function openResult(e, newWindow) {
     }
     let url = e.target.getAttribute("href");
     let title = e.target.innerText;
-	fetch("/history", {
-		method: "POST",
-		body: JSON.stringify({"url": url, "title": title, "query": input.value}),
-		headers: {"Content-type": "application/json; charset=UTF-8"},
-	}).then((r) => {
+    addHistoryItem(url, title, input.value).then((r) => {
 		openUrl(url, newWindow);
 	});
     return false;
+}
+
+function toggleActions(ev, res) {
+    let a = res.querySelector(".actions")
+    if(a) {
+        closeActions(a);
+        return;
+    }
+    a = createTemplate("result-actions", {
+        ".save": (e) => e.addEventListener("click", () => addPriorityResult(e)),
+        ".close": (e) => e.addEventListener("click", () => closeActions(e)),
+    });
+    for(let e of a.children) {
+        e.style.animation = "fade-in 0.5s";
+    }
+    res.appendChild(a);
+}
+
+function closeActions(e) {
+    e.closest(".actions").remove();
+}
+
+function addPriorityResult(e) {
+    let result = e.closest(".result");
+    let link = result.querySelector(".result-title a");
+    let url = link.getAttribute("href");
+    let title = link.innerText;
+    let query = result.querySelector(".action-query").value;
+    if(!query) {
+        return;
+    }
+    addHistoryItem(url, title, query).then((r) => {
+        let s = createTemplate("success", {
+            ".message": (e) => e.innerText = "Priority result added.",
+        });
+        result.querySelector(".actions").appendChild(s);
+    });
+}
+
+function addHistoryItem(url, title, query) {
+	return fetch("/history", {
+		method: "POST",
+		body: JSON.stringify({"url": url, "title": title, "query": query}),
+		headers: {"Content-type": "application/json; charset=UTF-8"},
+	})
 }
 
 let highlightIdx = 0;

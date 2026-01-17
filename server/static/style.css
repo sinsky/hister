@@ -111,6 +111,7 @@ input, textarea {
 }
 
 input[type=submit], button {
+    font-size: 1em;
     background: var(--color-semidark);
     color: var(--color-blue);
     border: 2px solid var(--color-blue);
@@ -147,6 +148,16 @@ code, kbd {
     padding: 0 0.2em;
 }
 
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
 .container {
     max-width: 70em;
     width: 100%;
@@ -170,6 +181,14 @@ code, kbd {
 .success {
     border-color: var(--color-green);
     color: var(--color-green);
+}
+
+.bordered {
+    border: 1px solid var(--color-grey);
+    border-radius: 0.4em;
+}
+.padded {
+    padding: 1em;
 }
 
 .full-width {
@@ -217,6 +236,15 @@ code, kbd {
         max-width: 100%;
         margin: 0;
         word-break: break-all;
+    }
+    .action-button {
+        display: inline-block;
+        height: 1.2em;
+        width: 1.2em;
+        line-height: 1.2em;
+        vertical-align: top;
+        cursor: pointer;
+        user-select: none;
     }
     .result-content {
         margin: 0;
