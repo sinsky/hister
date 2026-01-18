@@ -267,7 +267,7 @@ func serveHistory(c *webContext) {
 		serve500(c)
 		return
 	}
-	err = model.UpdateHistory(h.Query, h.URL, h.Title)
+	err = model.UpdateHistory(strings.TrimSpace(h.Query), strings.TrimSpace(h.URL), strings.TrimSpace(h.Title))
 	if err != nil {
 		log.Error().Err(err).Msg("failed to update history")
 		serve500(c)
