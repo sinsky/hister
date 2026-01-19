@@ -172,7 +172,7 @@ func serveSearch(c *webContext) {
 		if res == nil {
 			res = &indexer.Results{}
 		}
-		hr, err := model.GetURLsByQuery(query.Text)
+		hr, err := model.GetURLsByQuery(oq)
 		if err == nil && len(hr) > 0 {
 			res.History = hr
 		}
