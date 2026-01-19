@@ -22,9 +22,8 @@
 </template>
 <template id="tips">
 <div class="text-center">
-    <b>Tips</b><br />
-    Use <code>*</code> for partial match.<br />
-    Prefixing word with <code>-</code> excludes matching documents.
+    <h3>Tip</h3>
+    <p class="content"></p>
 </div>
 </template>
 <template id="result-actions">

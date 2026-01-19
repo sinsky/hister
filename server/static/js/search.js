@@ -10,6 +10,15 @@ for(let el of document.querySelectorAll("template")) {
     templates[id] = el;
 }
 
+const tips = [
+    'Use <code>*</code> for partial match.<br />Prefixing word with <code>-</code> excludes matching documents.',
+    'Click on the three dots near the result URL to specify priority queries for that result.',
+    'Press <code>enter</code> to open the first result.',
+    'Use <code>ctrl+k</code> and <code>ctrl+j</code> to navigate between results.',
+    'Press <code>ctrl+o</code> to open current search query in your configured search engine.',
+    'Use <code>url:</code> prefix to search only in the URL field. E.g.: <code>url:*github* hister</code>.',
+];
+
 function createTemplate(name, fns) {
     let el = document.importNode(templates[name].content, true)
     for(let k in fns) {
@@ -61,7 +70,7 @@ function renderResults(event) {
     updateAutocomplete(res.query_suggestion);
     if(!d || !d.length) {
         if(!input.value) {
-            results.replaceChildren(createTemplate("tips", {}));
+            results.replaceChildren(createTips());
             return
         }
         let u = getSearchUrl(input.value)
@@ -95,6 +104,12 @@ function handleInput() {
     sendQuery(input.value);
 }
 
+function createTips() {
+    return createTemplate("tips", {
+        ".content": e => e.innerHTML = tips[Math.floor(Math.random() * tips.length)],
+    });
+}
+
 function getSearchUrl(query) {
     return document.querySelector("#search-url").value.replace("{query}", escape(query));
 }
@@ -121,7 +136,7 @@ function openUrl(u, newWindow) {
 }
 
 function init() {
-    results.replaceChildren(createTemplate("tips", {}));
+    results.replaceChildren(createTips());
     connect();
 }
 
