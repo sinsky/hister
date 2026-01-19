@@ -12,14 +12,25 @@ const sleepIncrementRatio = 2;
 window.addEventListener("load", extract, false);
 
 function extract() {
-    d = extractData();
+    try {
+        d = extractData();
+    } catch(e) {
+        console.log("failed to extract page data:", e);
+        return;
+    }
     chrome.runtime.sendMessage({data:  d}, resp => {});
     setTimeout(update, sleepTime);
 }
 
 
 function update() {
-    let d2 = extractData();
+    let d2;
+    try {
+        d2 = extractData();
+    } catch(e) {
+        console.log("failed to extract page data", e);
+        return;
+    }
     if(d2.html != d.html) {
         sleepTime = defaultSleepTime;
         d = d2;
