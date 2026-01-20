@@ -15,7 +15,7 @@ async function cjsMsgHandler(request, sender, sendResponse) {
         if(!u.endsWith('/')) {
             u += '/';
         }
-        sendDocument(u+"add", d).then((r) => sendResponse({"msg": "ok"}));
+        sendDocument(u+"add", d).then((r) => sendResponse({"msg": "ok"})).catch(err => sendResponse({"error": err}));
     }).catch(error => {
         chrome.tabs.sendMessage(sender.tab.id, missingURLMsg);
     });
