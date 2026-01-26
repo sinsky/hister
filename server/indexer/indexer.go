@@ -52,6 +52,7 @@ type Document struct {
 	Favicon    string  `json:"favicon"`
 	Score      float64 `json:"score"`
 	faviconURL string
+	processed  bool
 }
 
 type Results struct {
@@ -82,6 +83,11 @@ func Init(idxPath string) error {
 }
 
 func Add(d *Document) error {
+	if !d.processed {
+		if err := d.Process(); err != nil {
+			return err
+		}
+	}
 	return i.idx.Index(d.URL, d)
 }
 
@@ -138,6 +144,9 @@ func GetByURL(u string) *Document {
 }
 
 func (d *Document) Process() error {
+	if d.processed {
+		return nil
+	}
 	if d.URL == "" {
 		return errors.New("missing URL")
 	}
@@ -160,6 +169,7 @@ func (d *Document) Process() error {
 			log.Warn().Err(err).Str("URL", d.faviconURL).Msg("failed to download favicon")
 		}
 	}
+	d.processed = true
 	return nil
 }
 
