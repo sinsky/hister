@@ -170,7 +170,19 @@ func serveIndex(c *webContext) {
 		res, err := indexer.Search(c.Config, &indexer.Query{
 			Text: c.Config.Rules.ResolveAliases(q),
 		})
-		if err != nil || len(res.Documents) == 0 {
+		if err != nil {
+			serve500(c)
+			return
+		}
+		hr, err := model.GetURLsByQuery(q)
+		if err == nil && len(hr) > 0 {
+			res.History = hr
+		}
+		if err != nil {
+			serve500(c)
+			return
+		}
+		if len(res.Documents) == 0 && len(hr) == 0 {
 			c.Redirect(strings.Replace(c.Config.App.SearchURL, "{query}", q, 1))
 			return
 		}

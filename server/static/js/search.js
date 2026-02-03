@@ -70,7 +70,7 @@ function renderResults(event) {
     const res = JSON.parse(event.data);
     const d = res.documents;
     updateAutocomplete(res.query_suggestion);
-    if(!d || !d.length) {
+    if(!d && !res.history) {
         if(!input.value) {
             results.replaceChildren(createTips());
             return
@@ -91,8 +91,10 @@ function renderResults(event) {
             resultElements.push(createPriorityResult(r))
         }
     }
-    for(let r of d) {
-        resultElements.push(createResult(r));
+    if(d) {
+        for(let r of d) {
+            resultElements.push(createResult(r));
+        }
     }
     results.replaceChildren(...resultElements);
     if(resultElements.length > 0) {
@@ -152,9 +154,13 @@ function openResult(e, newWindow) {
     let link = e.target.closest('.result-title a')
     let url = link.getAttribute("href");
     let title = link.innerText;
-    saveHistoryItem(url, title, input.value).then((r) => {
-		openUrl(url, newWindow);
-	});
+    if(!link.classList.contains("error")) {
+        saveHistoryItem(url, title, input.value).then((r) => {
+            openUrl(url, newWindow);
+        });
+    } else {
+        openUrl(url, newWindow);
+    }
     return false;
 }
 
