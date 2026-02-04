@@ -208,12 +208,16 @@ func (t *tui) renderHistoryItem(d *model.URLCount) {
 
 func (t *tui) renderResult(d *indexer.Document) {
 	//t.ResultsView.FgColor = gocui.ColorDefault | gocui.AttrBold
-	fmt.Fprintf(t.ResultsView, "\033[1m%s\033[0m\n", d.Title)
+	fmt.Fprintf(t.ResultsView, "\033[1m%s\033[0m\n", consolidateSpaces(d.Title))
 	fmt.Fprintf(t.ResultsView, "\033[34m%s\033[0m\n", d.URL)
 	if d.Text != "" {
-		fmt.Fprintln(t.ResultsView, strings.ReplaceAll(d.Text, "\n", " "))
+		fmt.Fprintln(t.ResultsView, consolidateSpaces(d.Text))
 	}
 	fmt.Fprintln(t.ResultsView, "")
+}
+
+func consolidateSpaces(s string) string {
+	return strings.Join(strings.Fields(s), " ")
 }
 
 func (t *tui) close() {
