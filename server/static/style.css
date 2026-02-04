@@ -260,6 +260,27 @@ table {
     }
 }
 
+.hotkey-toggle-section {
+    border-top: 2px solid var(--color-grey);
+    text-align: center;
+    p {
+        color: var(--color-semilight);
+        font-size: 0.9em;
+    }
+    .hotkey-toggle-btn {
+        transition: all 0.2s ease;
+        &:hover {
+            background: var(--color-blue);
+            color: var(--color-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        &:active {
+            transform: translateY(0);
+        }
+    }
+}
+
 .result {
     padding: 0.5em;
     margin-top: 0.5em;

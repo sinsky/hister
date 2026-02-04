@@ -175,7 +175,13 @@ function init() {
     results.replaceChildren(createTips());
     connect();
 
-    document.getElementById('hotkey-button').addEventListener('click', showHotkeys);
+    const hotkeyButton = document.getElementById('hotkey-button');
+    hotkeyButton.addEventListener('click', showHotkeys);
+
+    const hideButton = localStorage.getItem('hideHotkeyButton');
+    if(hideButton === 'true') {
+        hotkeyButton.classList.add('hidden');
+    }
 }
 
 function openResult(e, newWindow) {
@@ -457,7 +463,34 @@ function showHotkeys(e) {
         });
         c.appendChild(t);
     }
-    openPopup("<h2>Hotkeys</h2>", c.innerHTML);
+
+    const hideButton = localStorage.getItem('hideHotkeyButton') === 'true';
+    const toggleSection = `
+        <div class="hotkey-toggle-section mt-1">
+            <p>The hotkey button can be toggled using the button below. You can always press <kbd>?</kbd> to view this popup.</p>
+            <button class="hotkey-toggle-btn mt-1" onclick="toggleHotkeyButton()">
+                ${hideButton ? 'Show Hotkey Button' : 'Hide Hotkey Button'}
+            </button>
+        </div>
+    `;
+
+    openPopup("<h2>Hotkeys</h2>", c.innerHTML + toggleSection);
+}
+
+function toggleHotkeyButton() {
+    const hotkeyButton = document.getElementById('hotkey-button');
+    const isHidden = localStorage.getItem('hideHotkeyButton') === 'true';
+
+    if(isHidden) {
+        localStorage.setItem('hideHotkeyButton', 'false');
+        hotkeyButton.classList.remove('hidden');
+    } else {
+        localStorage.setItem('hideHotkeyButton', 'true');
+        hotkeyButton.classList.add('hidden');
+    }
+
+    closePopup();
+    showHotkeys();
 }
 
 String.prototype.replaceAt = function(index, replacement) {
