@@ -41,7 +41,7 @@ var rootCmd = &cobra.Command{
 
 var listenCmd = &cobra.Command{
 	Use:   "listen",
-	Short: "start server",
+	Short: "Start server",
 	Long:  ``,
 	PreRun: func(_ *cobra.Command, _ []string) {
 		initDB()
@@ -55,8 +55,7 @@ var listenCmd = &cobra.Command{
 
 var createConfigCmd = &cobra.Command{
 	Use:   "create-config FILENAME",
-	Short: "create default configuration file",
-	Long:  `create-config FILENAME`,
+	Short: "Create default configuration file",
 	Args:  cobra.ExactArgs(1),
 	Run: func(_ *cobra.Command, args []string) {
 		fname := args[0]
@@ -77,8 +76,8 @@ var createConfigCmd = &cobra.Command{
 
 var listURLsCmd = &cobra.Command{
 	Use:   "list-urls",
-	Short: "list indexed URLs",
-	Long:  `list indexed URLs - server should be stopped`,
+	Short: "List indexed URLs",
+	Long:  `List indexed URLs - server should be stopped`,
 	PreRun: func(_ *cobra.Command, _ []string) {
 		initIndex()
 	},
@@ -91,7 +90,7 @@ var listURLsCmd = &cobra.Command{
 
 var importCmd = &cobra.Command{
 	Use:   "import BROWSER_TYPE DB_PATH",
-	Short: "import chrome/firefox path/do/browser.db",
+	Short: "Import Chrome or Firefox browsing history",
 	Long: `
 The Firefox URL database file is usually located at /home/[USER]/.mozilla/[PROFILE]/places.sqlite
 The Chrome/Chromium URL database fiel is usually located at /home/[USER]/.config/chromium/Default/History
@@ -102,7 +101,7 @@ The Chrome/Chromium URL database fiel is usually located at /home/[USER]/.config
 
 var searchCmd = &cobra.Command{
 	Use:   "search",
-	Short: "command line search interface",
+	Short: "Command line search interface",
 	Long:  "",
 	Run: func(_ *cobra.Command, _ []string) {
 		if err := ui.SearchTUI(cfg); err != nil {
@@ -113,7 +112,7 @@ var searchCmd = &cobra.Command{
 
 var indexCmd = &cobra.Command{
 	Use:   "index URL",
-	Short: "index URL",
+	Short: "Index URL",
 	Long:  ``,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -127,7 +126,7 @@ var indexCmd = &cobra.Command{
 
 var reindexCmd = &cobra.Command{
 	Use:   "reindex",
-	Short: "reindex",
+	Short: "Reindex",
 	Long:  `Recreate index - server should be stopped`,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := indexer.Reindex(cfg.IndexPath(), cfg.FullPath("tmp_index.db"))
