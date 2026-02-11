@@ -43,7 +43,6 @@ document.querySelector("#reindex").addEventListener("click", (e) => {
             msgBox.innerText = "Reindex failed";
             if(r && r.error) {
                 msgBox.innerText += ": " + r.error;
-                console.log(r.error);
             }
         });
 	});
