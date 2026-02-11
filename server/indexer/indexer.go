@@ -90,7 +90,7 @@ func Init(idxPath string) error {
 	return nil
 }
 
-func Reindex(idxPath, tmpIdxPath string) error {
+func Reindex(idxPath, tmpIdxPath string, rules *config.Rules) error {
 	idx, err := bleve.Open(idxPath)
 	if err != nil {
 		return err
@@ -119,6 +119,11 @@ func Reindex(idxPath, tmpIdxPath string) error {
 				os.RemoveAll(tmpIdxPath)
 				return err
 			}
+			if rules.IsSkip(d.URL) {
+				log.Info().Str("URL", d.URL).Msg("Dropping URL that has since been added to skip rules.")
+				continue
+			}
+			// priority/score are updated implicitly by bleve
 			if err := tmpIdx.Index(d.URL, d); err != nil {
 				tmpIdx.Close()
 				os.RemoveAll(tmpIdxPath)

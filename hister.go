@@ -154,7 +154,7 @@ var reindexCmd = &cobra.Command{
 	Short: "Reindex",
 	Long:  `Recreate index - server should be stopped`,
 	Run: func(cmd *cobra.Command, args []string) {
-		err := indexer.Reindex(cfg.IndexPath(), cfg.FullPath("tmp_index.db"))
+		err := indexer.Reindex(cfg.IndexPath(), cfg.FullPath("tmp_index.db"), cfg.Rules)
 		if err != nil {
 			exit(1, err.Error())
 		}
