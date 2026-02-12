@@ -379,9 +379,12 @@ func indexURL(u string) error {
 		return errors.New(`failed to download file: ` + err.Error())
 	}
 	defer r.Body.Close()
+	if r.StatusCode != http.StatusOK {
+		return fmt.Errorf("invalid response code: %d", r.StatusCode)
+	}
 	contentType := r.Header.Get("Content-type")
 	if !strings.Contains(contentType, "html") {
-		errors.New("invalid content type: " + contentType)
+		return errors.New("invalid content type: " + contentType)
 	}
 	buf := bytes.NewBuffer(nil)
 	io.Copy(buf, r.Body)
