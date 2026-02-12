@@ -32,6 +32,18 @@ type historyItem struct {
 	Query  string `json:"query"`
 	Delete bool   `json:"delete"`
 }
+type csrfExceptionHandler struct {
+	origHandler http.Handler
+	csrfHandler http.Handler
+}
+
+func (c *csrfExceptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/add" && strings.HasPrefix(r.Header.Get("Origin"), "moz-extension://") {
+		c.origHandler.ServeHTTP(w, r)
+	} else {
+		c.csrfHandler.ServeHTTP(w, r)
+	}
+}
 
 var tFns = template.FuncMap{
 	"FormatDate": func(t time.Time) string { return t.Format("2006-01-02") },
@@ -74,18 +86,7 @@ func Listen(cfg *config.Config) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", createRouter(cfg))
 
-	protection := csrf.New()
-	trustedOrigins := []string{
-		strings.TrimSuffix(cfg.BaseURL("/"), "/"),
-		"chrome-extension://cciilamhchpmbdnniabclekddabkifhb",
-		"moz-extension://0dce49ea-6bfd-46a6-a4a9-c9e45145e011",
-	}
-	for _, o := range trustedOrigins {
-		if err := protection.AddTrustedOrigin(o); err != nil {
-			panic(err)
-		}
-	}
-	handler := protection.Handler(mux)
+	handler := csrfMiddleware(mux, cfg)
 
 	log.Info().Str("Address", cfg.Server.Address).Str("URL", cfg.BaseURL("/")).Msg("Starting webserver")
 	http.ListenAndServe(cfg.Server.Address, handler)
@@ -161,6 +162,31 @@ func createRouter(cfg *config.Config) func(w http.ResponseWriter, r *http.Reques
 		}
 		serve404(c)
 	}
+}
+
+func csrfMiddleware(h http.Handler, cfg *config.Config) http.Handler {
+	protection := csrf.New()
+	trustedOrigins := []string{
+		strings.TrimSuffix(cfg.BaseURL("/"), "/"),
+		"chrome-extension://cciilamhchpmbdnniabclekddabkifhb",
+	}
+	for _, o := range trustedOrigins {
+		if err := protection.AddTrustedOrigin(o); err != nil {
+			panic(err)
+		}
+	}
+	ch := protection.Handler(h)
+	// TODO
+	// WARNING this is a temporary solution, until we find out how to
+	// do proper CSRF protection with Firefox extensions.
+	// The problem comes from Firefox generating a dynamic internal ID
+	// for each addon install and uses that ID in the Origin HTTP header,
+	// so we can't check it to identify our addon.
+	handler := &csrfExceptionHandler{
+		origHandler: h,
+		csrfHandler: ch,
+	}
+	return handler
 }
 
 func serveIndex(c *webContext) {
