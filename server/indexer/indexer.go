@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -73,6 +74,52 @@ type Results struct {
 
 var i *indexer
 var allFields []string = []string{"url", "title", "text", "favicon", "html", "domain", "added"}
+var ErrSensitiveContent = errors.New("document contains sensitive data")
+var sensitiveContentPatterns = []string{
+	// AWS Access Key
+	`AKIA[0-9A-Z]{16}`,
+	// AWS Secret Key
+	`(?i)aws(.{0,20})?(secret)?(.{0,20})?['"][0-9a-zA-Z\/+]{40}['"]`,
+	// Private Key
+	`-----BEGIN (RSA|EC|DSA)? PRIVATE KEY-----`,
+	// Generic API Key
+	`(?i)(api|token|secret)[\s:=]+['"]?[a-z0-9]{32,}['"]?`,
+	// Slack Token
+	`xox[baprs]-[0-9a-zA-Z]{10,48}`,
+	// GitHub Token
+	`(ghp|gho|ghu|ghs|ghr)_[a-zA-Z0-9]{36}`,
+	// Google API Key
+	`AIza[0-9A-Za-z\-_]{35}`,
+	// Heroku API Key
+	`[hH][eE][rR][oO][kK][uU].{0,30}[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}`,
+	// SSH Private Key
+	`-----BEGIN OPENSSH PRIVATE KEY-----`,
+	// PGP Private Key
+	`-----BEGIN PGP PRIVATE KEY BLOCK-----`,
+	// JWT Token
+	`eyJ[a-zA-Z0-9\/_-]{10,}\.[a-zA-Z0-9\/_-]{10,}\.[a-zA-Z0-9\/_-]{10,}`,
+	// Credit Card Number
+	`\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|6(?:011|5[0-9]{2})[0-9]{12}|(?:2131|1800|35\d{3})\d{11})\b`,
+	// Basic Auth Credentials
+	`(?i)basic [a-z0-9=:_\+\/-]{5,100}`,
+	// Docker Registry Auth
+	`"auth"\s*:\s*"[a-z0-9=:_\+\/-]{5,100}"`,
+	// Azure Storage Key
+	`DefaultEndpointsProtocol=https;AccountName=[a-z0-9]{3,24};AccountKey=[a-z0-9\/+]{88}==`,
+	// Google OAuth Token
+	`ya29\.[a-zA-Z0-9\-_]+`,
+	// Facebook Access Token
+	`EAACEdEose0cBA[0-9A-Za-z]+`,
+	// Twitter API Key
+	`(?i)twitter(.{0,20})?['"][0-9a-z]{35,44}['"]`,
+	// Database Connection String
+	//`(?i)(jdbc:|mongodb:\/\/|postgresql:\/\/|mysql:\/\/).+:[^@]+@[a-z0-9\.-]+`,
+}
+var sensitiveContentRe *regexp.Regexp
+
+func init() {
+	sensitiveContentRe = regexp.MustCompile(fmt.Sprintf("(%s)", strings.Join(sensitiveContentPatterns, "|")))
+}
 
 func Init(idxPath string) error {
 	idx, err := bleve.Open(idxPath)
@@ -215,6 +262,9 @@ func GetByURL(u string) *Document {
 func (d *Document) Process() error {
 	if d.processed {
 		return nil
+	}
+	if sensitiveContentRe.MatchString(d.HTML) {
+		return ErrSensitiveContent
 	}
 	if d.URL == "" {
 		return errors.New("missing URL")
