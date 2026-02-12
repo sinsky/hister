@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -569,6 +570,11 @@ func (q *Query) SetBoost(b float64) {
 
 func (q *Query) Boost() float64 {
 	return q.boostVal.Value()
+}
+
+func (q *Query) ToJSON() []byte {
+	r, _ := json.Marshal(q)
+	return r
 }
 
 func (q *Query) Searcher(ctx context.Context, i index.IndexReader, m mapping.IndexMapping, options search.SearcherOptions) (search.Searcher, error) {
