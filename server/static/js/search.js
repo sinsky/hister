@@ -306,7 +306,11 @@ function createResult(r) {
 }
 
 function clickHandler(e, leftClickCallback, middleClickCallback) {
-    e.addEventListener("click", leftClickCallback);
+    e.addEventListener("click", ev => {
+        if (ev.ctrlKey) {
+            leftClickCallback(true);
+        }
+    });
 	e.addEventListener("auxclick", ev => {
 		if (ev.button == 1) {
 			middleClickCallback(ev);
