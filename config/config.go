@@ -23,11 +23,12 @@ import (
 )
 
 type Config struct {
-	fname   string
-	App     App     `yaml:"app"`
-	Server  Server  `yaml:"server"`
-	Hotkeys Hotkeys `yaml:"hotkeys"`
-	Rules   *Rules  `yaml:"-"`
+	fname                    string
+	App                      App               `yaml:"app"`
+	Server                   Server            `yaml:"server"`
+	Hotkeys                  Hotkeys           `yaml:"hotkeys"`
+	SensitiveContentPatterns map[string]string `yaml:"sensitive_content_patterns"`
+	Rules                    *Rules            `yaml:"-"`
 }
 
 type App struct {
@@ -131,6 +132,14 @@ func CreateDefaultConfig() *Config {
 			"alt+v":     "view_result_popup",
 			"tab":       "autocomplete",
 			"?":         "show_hotkeys",
+		},
+		SensitiveContentPatterns: map[string]string{
+			"aws_access_key":      `AKIA[0-9A-Z]{16}`,
+			"aws_secret_key":      `(?i)aws(.{0,20})?(secret)?(.{0,20})?['"][0-9a-zA-Z\/+]{40}['"]`,
+			"generic_private_key": `-----BEGIN ((RSA|EC|DSA) )?PRIVATE KEY-----`,
+			"github_token":        `(ghp|gho|ghu|ghs|ghr)_[a-zA-Z0-9]{36}`,
+			"ssh_private_key":     `-----BEGIN OPENSSH PRIVATE KEY-----`,
+			"pgp_private_key":     `-----BEGIN PGP PRIVATE KEY BLOCK-----`,
 		},
 	}
 }

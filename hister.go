@@ -305,7 +305,7 @@ func initDB() {
 }
 
 func initIndex() {
-	err := indexer.Init(cfg.IndexPath())
+	err := indexer.Init(cfg)
 	if err != nil {
 		exit(1, err.Error())
 	}
