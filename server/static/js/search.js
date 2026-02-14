@@ -264,9 +264,16 @@ function createResultsHeader(res) {
         ".export-rss": (e) => e.addEventListener("click", () => exportRSS()),
     });
     if(res.query && res.query.text != input.value) {
-        header.querySelector(".expanded-query").innerHTML = `Expanded query: <code>"${res.query.text}"</code>`;
+        header.querySelector(".expanded-query").innerHTML = `Expanded query: <code>"${escapeHTML(res.query.text)}"</code>`;
     }
     return header;
+}
+
+function escapeHTML(s) {
+    let pre = document.createElement('pre');
+    let text = document.createTextNode(s);
+    pre.appendChild(text);
+    return pre.innerHTML;
 }
 
 function createPriorityResult(r) {
@@ -274,7 +281,6 @@ function createPriorityResult(r) {
         "a": (e) => {
             e.setAttribute("href", r.url);
             e.innerHTML = r.title || "*title*";
-            // TODO handle middleclick (auxclick handler)
             clickHandler(e, openResult, ev => openResult(ev, true));
             e.classList.add("success");
         },
@@ -290,7 +296,6 @@ function createResult(r) {
         ".result-title a": e => {
             e.setAttribute("href", r.url);
             e.innerHTML = r.title || "*title*";
-            // TODO handle middleclick (auxclick handler)
             clickHandler(e, openResult, ev => openResult(ev, true));
         },
         ".readable": e => createReadable(e, r.url),
