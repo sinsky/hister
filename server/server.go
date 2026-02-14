@@ -2,6 +2,7 @@ package server
 
 import (
 	"bufio"
+	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -97,6 +98,7 @@ type webContext struct {
 	Request  *http.Request
 	Response http.ResponseWriter
 	Config   *config.Config
+	nonce    string
 }
 
 func init() {
@@ -135,7 +137,9 @@ func createRouter(cfg *config.Config) http.Handler {
 			Request:  r,
 			Response: w,
 			Config:   cfg,
+			nonce:    rand.Text(),
 		}
+		c.Response.Header().Add("Content-Security-Policy", fmt.Sprintf("script-src 'nonce-%s'", c.nonce))
 		switch r.URL.Path {
 		case "/":
 			serveIndex(c)
@@ -552,6 +556,7 @@ func (c *webContext) Render(tpl string, args tArgs) {
 		args = make(tArgs)
 	}
 	args["Config"] = c.Config
+	args["Nonce"] = c.nonce
 	t, ok := tpls[tpl]
 	if !ok {
 		log.Error().Str("template", tpl).Msg("template not found")
