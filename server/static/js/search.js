@@ -131,6 +131,7 @@ function renderResults(event) {
             r.classList.add("highlight");
         }
     }
+    scrollTo(results.children[0]);
 };
 
 input.addEventListener("input", () => {
@@ -501,13 +502,31 @@ function selectPreviousResult(e) {
 }
 
 function selectNthResult(e, n) {
-        e.preventDefault();
-        let res = document.querySelectorAll(".result");
-        if(res.length > highlightIdx) {
-            res[highlightIdx].classList.remove("highlight");
-        }
-        highlightIdx = (highlightIdx+n+res.length) % res.length;
-        res[highlightIdx].classList.add("highlight");
+    e.preventDefault();
+    let res = document.querySelectorAll(".result");
+    if(res.length > highlightIdx) {
+        res[highlightIdx].classList.remove("highlight");
+    }
+    highlightIdx = (highlightIdx+n+res.length) % res.length;
+    res[highlightIdx].classList.add("highlight");
+    scrollTo(res[highlightIdx]);
+}
+
+function scrollTo(el) {
+    let staticOffset = 60;
+    let searchRect = document.querySelector('.search').getBoundingClientRect()
+    let topPos =  searchRect.height + searchRect.y;
+    let rect = el.getBoundingClientRect();
+    if(rect.y <= topPos) {
+        let offset = rect.y - topPos - staticOffset;
+        window.scrollBy(0, offset);
+        return;
+    }
+    if(rect.y+rect.height > window.innerHeight-staticOffset) {
+        let offset = rect.y+rect.height - window.innerHeight + staticOffset;
+        window.scrollBy(0, offset);
+        return;
+    }
 }
 
 function openQueryInSearchEngine(e) {

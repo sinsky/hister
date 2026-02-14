@@ -1,7 +1,9 @@
 {{ define "main" }}
-<div class="search text-center">
-    <input type="text" autofocus id="search" />
-    <input type="text" disabled id="autocomplete" value="Search..."/>
+<div class="sticky">
+    <div class="search text-center">
+        <input type="text" autofocus id="search" />
+        <input type="text" disabled id="autocomplete" value="Search..."/>
+    </div>
 </div>
 <button id="hotkey-button" class="hotkeys-button" title="Hotkeys (?)">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

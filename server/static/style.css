@@ -210,15 +210,21 @@ table {
     }
 }
 
+.sticky {
+    position: sticky;
+    top: 0;
+}
 .search {
     position: relative;
-    margin-top: 1em;
+    margin: 1em 0;
     height: 5em;
     input {
+        box-shadow: 0 0.3em 0.3em rgba(0, 0, 0, 0.5);
         position: absolute;
         top: 0;
         left: 10%;
         width: 80%;
+        margin: 0;
         font-size: 2em;
     }
     #search {
