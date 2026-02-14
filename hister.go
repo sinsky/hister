@@ -56,23 +56,27 @@ var listenCmd = &cobra.Command{
 }
 
 var createConfigCmd = &cobra.Command{
-	Use:   "create-config FILENAME",
+	Use:   "create-config [FILENAME]",
 	Short: "Create default configuration file",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(_ *cobra.Command, args []string) {
-		fname := args[0]
-		if _, err := os.Stat(fname); err == nil {
-			exit(1, fmt.Sprintf(`File "%s" already exists`, fname))
-		}
 		dcfg := config.CreateDefaultConfig()
 		cb, err := yaml.Marshal(dcfg)
 		if err != nil {
 			panic(err)
 		}
-		if err := os.WriteFile(fname, cb, 0600); err != nil {
-			exit(1, `Failed to create config file: `+err.Error())
+		if len(args) > 0 {
+			fname := args[0]
+			if _, err := os.Stat(fname); err == nil {
+				exit(1, fmt.Sprintf(`File "%s" already exists`, fname))
+			}
+			if err := os.WriteFile(fname, cb, 0600); err != nil {
+				exit(1, `Failed to create config file: `+err.Error())
+			}
+			fmt.Println("Config file created")
+		} else {
+			fmt.Print(string(cb))
 		}
-		fmt.Println("Config file created")
 	},
 }
 
