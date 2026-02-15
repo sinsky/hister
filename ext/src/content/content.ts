@@ -10,7 +10,14 @@ const defaultSleepTime = 10*1000;
 let sleepTime = defaultSleepTime;
 const sleepIncrementRatio = 2;
 
-window.addEventListener("load", extract, false);
+// @ts-ignore
+var isFirefox = typeof InstallTrigger !== 'undefined';
+
+if(isFirefox) {
+	window.addEventListener("pageshow", extract);
+} else {
+	window.addEventListener("load", extract);
+}
 window.addEventListener("navigatesuccess", update)
 
 function extract(sendResponse) {
