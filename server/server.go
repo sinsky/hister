@@ -224,7 +224,7 @@ func withCSRF(c *webContext, handler func(*webContext)) {
 			http.Error(c.Response, errCSRFMismatch.Error(), http.StatusInternalServerError)
 			return
 		}
-		token := c.Request.FormValue(tokName)
+		token := c.Request.PostFormValue(tokName)
 		if token == "" {
 			token = c.Request.Header.Get("X-CSRF-Token")
 		}
@@ -381,7 +381,7 @@ func serveAdd(c *webContext) {
 			serve500(c)
 			return
 		}
-		f := c.Request.Form
+		f := c.Request.PostForm
 		d.URL = f.Get("url")
 		d.Title = f.Get("title")
 		d.Text = f.Get("text")
@@ -462,7 +462,7 @@ func serveRules(c *webContext) {
 		serve500(c)
 		return
 	}
-	f := c.Request.Form
+	f := c.Request.PostForm
 	c.Config.Rules.Skip.ReStrs = strings.Fields(f.Get("skip"))
 	c.Config.Rules.Priority.ReStrs = strings.Fields(f.Get("priority"))
 	err = c.Config.SaveRules()
@@ -519,7 +519,7 @@ func serveAddAlias(c *webContext) {
 		serve500(c)
 		return
 	}
-	f := c.Request.Form
+	f := c.Request.PostForm
 	if f.Get("alias-keyword") != "" && f.Get("alias-value") != "" {
 		c.Config.Rules.Aliases[f.Get("alias-keyword")] = f.Get("alias-value")
 	}
@@ -538,7 +538,7 @@ func serveDeleteAlias(c *webContext) {
 		serve500(c)
 		return
 	}
-	a := c.Request.Form.Get("alias")
+	a := c.Request.PostForm.Get("alias")
 	if _, ok := c.Config.Rules.Aliases[a]; !ok {
 		serve500(c)
 		return
@@ -557,7 +557,7 @@ func serveDeleteDocument(c *webContext) {
 		serve500(c)
 		return
 	}
-	u := c.Request.Form.Get("url")
+	u := c.Request.PostForm.Get("url")
 	if err := indexer.Delete(u); err != nil {
 		log.Error().Err(err).Str("URL", u).Msg("failed to delete URL")
 	}
