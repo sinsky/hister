@@ -91,7 +91,7 @@ const addon = {
                         content['version'] = process.env.npm_package_version;
                         content['background']['service_worker'] = 'background.js';
                         // Chrome throws an error if the favicon URL is not a HTTP URL
-                        contenti['chrome_settings_overrides']['search_provider']['is_default'] = "http://127.0.0.1:4433/static/logo.png"
+                        content['chrome_settings_overrides']['search_provider']['is_default'] = "http://127.0.0.1:4433/static/logo.png"
                         return Buffer.from(JSON.stringify(content));
                     },
                     to: 'manifest.json'
