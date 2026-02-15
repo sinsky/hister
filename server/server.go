@@ -393,6 +393,7 @@ func serveAdd(c *webContext) {
 			return
 		}
 		err := indexer.Add(d)
+		log.Debug().Str("URL", d.URL).Msg("item added to index")
 		if err != nil {
 			log.Error().Err(err).Str("URL", d.URL).Msg("failed to create index")
 			serve500(c)
