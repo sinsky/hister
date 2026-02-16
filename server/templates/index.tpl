@@ -3,6 +3,7 @@
     <div class="search text-center">
         <input type="text" autofocus id="search" />
         <input type="text" disabled id="autocomplete" value="Search..."/>
+        <div id="ws-status" class="ws-status" title="Websocket disconnected"></div>
     </div>
 </div>
 <button id="hotkey-button" class="hotkeys-button" title="Hotkeys (?)">

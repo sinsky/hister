@@ -235,6 +235,21 @@ table {
         z-index: 1;
         color: var(--color-semilight);
     }
+    .ws-status {
+        position: absolute;
+        top: 1.5em;
+        right: calc(10% + 1em);
+        width: 0.8em;
+        height: 0.8em;
+        border-radius: 50%;
+        background-color: var(--color-error);
+        z-index: 3;
+        box-shadow: 0 0 0.3em rgba(0, 0, 0, 0.5);
+        transition: background-color 0.3s ease;
+        &.connected {
+            background-color: var(--color-green);
+        }
+    }
 }
 
 .hotkeys-button {
@@ -430,6 +445,12 @@ mark {
             font-size: 1.5em;
             left: 2.5%;
             width: 95%;
+        }
+        .ws-status {
+            top: 1.2em;
+            width: 0.6em;
+            height: 0.6em;
+            right: calc(2.5% + 0.8em);
         }
     }
     .result {

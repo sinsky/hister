@@ -3,6 +3,7 @@ let input = document.getElementById("search");
 let autocompleteEl = document.getElementById("autocomplete");
 let results = document.getElementById("results");
 let csrf = document.getElementById("csrf_token");
+let statusEl = document.getElementById("ws-status");
 let emptyImg = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
 let urlState = {};
 let lastResults = null;
@@ -61,6 +62,7 @@ function connect() {
     ws = new WebSocket(document.querySelector("#ws-url").value);
 
     ws.onopen = function() {
+        updateConnectionStatus(true);
         const urlParams = new URLSearchParams(window.location.search);
 		const query = urlParams.get('q');
         if(query) {
@@ -73,12 +75,24 @@ function connect() {
 
     ws.onclose = function() {
         console.log("WebSocket connection closed, retrying...");
+        updateConnectionStatus(false);
         setTimeout(connect, 1000); // Reconnect after 1 second
     };
 
     ws.onerror = function(error) {
         console.error("WebSocket error:", error);
+        updateConnectionStatus(false);
     };
+}
+
+function updateConnectionStatus(connected) {
+    if(connected) {
+        statusEl.classList.add("connected");
+        statusEl.title = "Websocket connected";
+    } else {
+        statusEl.classList.remove("connected");
+        statusEl.title = "Websocket disconnected";
+    }
 }
 
 function sendQuery(q) {
