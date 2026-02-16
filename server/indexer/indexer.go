@@ -73,10 +73,12 @@ type Results struct {
 	QuerySuggestion string            `json:"query_suggestion"`
 }
 
-var i *indexer
-var allFields []string = []string{"url", "title", "text", "favicon", "html", "domain", "added"}
-var ErrSensitiveContent = errors.New("document contains sensitive data")
-var sensitiveContentRe *regexp.Regexp
+var (
+	i                   *indexer
+	allFields           []string = []string{"url", "title", "text", "favicon", "html", "domain", "added"}
+	ErrSensitiveContent          = errors.New("document contains sensitive data")
+	sensitiveContentRe  *regexp.Regexp
+)
 
 func Init(cfg *config.Config) error {
 	sp := make([]string, 0, len(cfg.SensitiveContentPatterns))

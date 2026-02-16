@@ -29,8 +29,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var cfgFile string
-var cfg *config.Config
+var (
+	cfgFile string
+	cfg     *config.Config
+)
 
 var rootCmd = &cobra.Command{
 	Use:     "hister",
@@ -70,7 +72,7 @@ var createConfigCmd = &cobra.Command{
 			if _, err := os.Stat(fname); err == nil {
 				exit(1, fmt.Sprintf(`File "%s" already exists`, fname))
 			}
-			if err := os.WriteFile(fname, cb, 0600); err != nil {
+			if err := os.WriteFile(fname, cb, 0o600); err != nil {
 				exit(1, `Failed to create config file: `+err.Error())
 			}
 			fmt.Println("Config file created")
