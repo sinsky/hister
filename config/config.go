@@ -35,10 +35,11 @@ type Config struct {
 }
 
 type App struct {
-	Directory string `yaml:"directory"`
-	SearchURL string `yaml:"search_url"`
-	LogLevel  string `yaml:"log_level"`
-	DebugSQL  bool   `yaml:"debug_sql"`
+	Directory           string `yaml:"directory"`
+	SearchURL           string `yaml:"search_url"`
+	LogLevel            string `yaml:"log_level"`
+	DebugSQL            bool   `yaml:"debug_sql"`
+	OpenResultsOnNewTab bool   `yaml:"open_results_on_new_tab"`
 }
 
 type Server struct {
@@ -146,9 +147,10 @@ func Load(filename string) (*Config, error) {
 func CreateDefaultConfig() *Config {
 	return &Config{
 		App: App{
-			SearchURL: "https://google.com/search?q={query}",
-			Directory: getDefaultDataDir(),
-			LogLevel:  "info",
+			SearchURL:           "https://google.com/search?q={query}",
+			Directory:           getDefaultDataDir(),
+			LogLevel:            "info",
+			OpenResultsOnNewTab: false,
 		},
 		Server: Server{
 			Address:  "127.0.0.1:4433",

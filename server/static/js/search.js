@@ -4,6 +4,7 @@ let autocompleteEl = document.getElementById("autocomplete");
 let results = document.getElementById("results");
 let csrf = document.getElementById("csrf_token");
 let statusEl = document.getElementById("ws-status");
+let openResultsOnNewTab = document.getElementById("open-results-on-new-tab").value == "true";
 let emptyImg = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
 let urlState = {};
 let lastResults = null;
@@ -256,7 +257,7 @@ function openResult(e, newWindow) {
     if(e.preventDefault) {
         e.preventDefault();
     }
-    if (e.ctrlKey) {
+    if(e.ctrlKey || openResultsOnNewTab) {
         newWindow = true;
     }
     let link = e.target.closest('.result-title a')

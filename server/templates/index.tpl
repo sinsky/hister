@@ -84,5 +84,6 @@
 <input type="hidden" id="ws-url" value="{{ .Config.WebSocketURL }}" />
 <input type="hidden" id="csrf_token" value="{{ .CSRF }}" />
 <input type="hidden" id="search-url" value="{{ .Config.App.SearchURL }}" />
+<input type="hidden" id="open-results-on-new-tab" value="{{ .Config.App.OpenResultsOnNewTab }}" />
 <script src="static/js/search.js" nonce="{{ .Nonce }}"></script>
 {{ end }}
