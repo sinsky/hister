@@ -279,6 +279,14 @@ function createResultsHeader(res) {
         ".export-json": (e) => e.addEventListener("click", () => exportJSON()),
         ".export-csv": (e) => e.addEventListener("click", () => exportCSV()),
         ".export-rss": (e) => e.addEventListener("click", () => exportRSS()),
+        "#external-search-link": (e) => {
+            if(input.value.trim()) {
+                e.href = getSearchUrl(input.value);
+                e.style.display = "inline";
+            } else {
+                e.style.display = "none";
+            }
+        },
     });
     if(res.query && res.query.text != input.value) {
         header.querySelector(".expanded-query").innerHTML = `Expanded query: <code>"${escapeHTML(res.query.text)}"</code>`;

@@ -24,7 +24,12 @@
 </template>
 <template id="results-header">
     <div class="results-header">
-        <div class="duration float-right"></div>
+        <div class="float-right">
+            <div class="duration text-right"></div>
+            <div class="search-engine-link">
+                <a id="external-search-link" href="#" style="display:none;">Open in external search engine</a>
+            </div>
+        </div>
         <div>Total number of results: <b class="results-num"></b></div>
         <div class="expanded-query"></div>
         <div class="export-buttons">

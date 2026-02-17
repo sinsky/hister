@@ -456,6 +456,10 @@ table {
     text-align: center;
 }
 
+.text-right {
+    text-align: right;
+}
+
 .center-align {
     margin-left: auto;
     margin-right: auto;
