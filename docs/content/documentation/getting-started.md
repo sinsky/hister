@@ -153,7 +153,7 @@ The TUI uses the following keybindings by default:
 
 ### Customizing TUI Keybindings
 
-You can customize the TUI keybindings in your `~/.config/hister/config.yml` file under the `tui_hotkeys` section:
+You can customize the TUI keybindings in your `~/.config/hister/config.yml` file under the `hotkeys.tui` section:
 
 #### Available Actions
 

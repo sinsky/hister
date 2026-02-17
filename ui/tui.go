@@ -200,7 +200,7 @@ func (m *tuiModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *tuiModel) handleInputKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	action := m.cfg.TUIHotkeys[msg.String()]
+	action := m.cfg.Hotkeys.TUI[msg.String()]
 	if msg.Type == tea.KeyRunes {
 		action = ""
 	}
@@ -234,7 +234,7 @@ func (m *tuiModel) handleInputKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m *tuiModel) handleResultsKeys(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	action := m.cfg.TUIHotkeys[msg.String()]
+	action := m.cfg.Hotkeys.TUI[msg.String()]
 	switch action {
 	case "quit":
 		return m, tea.Quit
@@ -351,7 +351,7 @@ func (m *tuiModel) View() string {
 
 func generateHelpText(cfg *config.Config) string {
 	bindings := make(map[string][]string)
-	for k, v := range cfg.TUIHotkeys {
+	for k, v := range cfg.Hotkeys.TUI {
 		bindings[v] = append(bindings[v], k)
 	}
 	fmtAct := func(action, label string) string {

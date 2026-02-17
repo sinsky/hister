@@ -29,7 +29,6 @@ type Config struct {
 	App                      App               `yaml:"app"`
 	Server                   Server            `yaml:"server"`
 	Hotkeys                  Hotkeys           `yaml:"hotkeys"`
-	TUIHotkeys               TUIHotkeys        `yaml:"tui_hotkeys"`
 	SensitiveContentPatterns map[string]string `yaml:"sensitive_content_patterns"`
 	Rules                    *Rules            `yaml:"-"`
 	secretKey                []byte
@@ -49,8 +48,10 @@ type Server struct {
 	Database string `yaml:"database"`
 }
 
-type Hotkeys map[string]string
-type TUIHotkeys map[string]string
+type Hotkeys struct {
+	Web map[string]string `yaml:"web"`
+	TUI map[string]string `yaml:"tui"`
+}
 
 type Rules struct {
 	Skip     *Rule   `json:"skip"`
@@ -170,28 +171,30 @@ func CreateDefaultConfig() *Config {
 			Database: "db.sqlite3",
 		},
 		Hotkeys: Hotkeys{
-			"alt+j":     "select_next_result",
-			"alt+k":     "select_previous_result",
-			"/":         "focus_search_input",
-			"enter":     "open_result",
-			"alt+enter": "open_result_in_new_tab",
-			"alt+o":     "open_query_in_search_engine",
-			"alt+v":     "view_result_popup",
-			"tab":       "autocomplete",
-			"?":         "show_hotkeys",
-		},
-		TUIHotkeys: TUIHotkeys{
-			"ctrl+c": "quit",
-			"q":      "quit",
-			"?":      "toggle_help",
-			"tab":    "toggle_focus",
-			"up":     "scroll_up",
-			"k":      "scroll_up",
-			"down":   "scroll_down",
-			"j":      "scroll_down",
-			"enter":  "open_result",
-			"d":      "delete_result",
-			"esc":    "toggle_focus", // Safely map esc away from quit
+			Web: map[string]string{
+				"alt+j":     "select_next_result",
+				"alt+k":     "select_previous_result",
+				"/":         "focus_search_input",
+				"enter":     "open_result",
+				"alt+enter": "open_result_in_new_tab",
+				"alt+o":     "open_query_in_search_engine",
+				"alt+v":     "view_result_popup",
+				"tab":       "autocomplete",
+				"?":         "show_hotkeys",
+			},
+			TUI: map[string]string{
+				"ctrl+c": "quit",
+				"q":      "quit",
+				"?":      "toggle_help",
+				"tab":    "toggle_focus",
+				"up":     "scroll_up",
+				"k":      "scroll_up",
+				"down":   "scroll_down",
+				"j":      "scroll_down",
+				"enter":  "open_result",
+				"d":      "delete_result",
+				"esc":    "toggle_focus", // Safely map esc away from quit
+			},
 		},
 		SensitiveContentPatterns: map[string]string{
 			"aws_access_key":      `AKIA[0-9A-Z]{16}`,
@@ -270,9 +273,6 @@ func (c *Config) init() error {
 		}
 	}
 	if err := c.Hotkeys.Validate(); err != nil {
-		return err
-	}
-	if err := c.TUIHotkeys.Validate(); err != nil {
 		return err
 	}
 	sPath := c.FullPath(secretKeyFilename)
@@ -478,7 +478,7 @@ func (r *Rules) ResolveAliases(s string) string {
 }
 
 func (h Hotkeys) Validate() error {
-	for k, v := range h {
+	for k, v := range h.Web {
 		if !slices.Contains(hotkeyActions, v) {
 			return errors.New("unknown hotkey action: " + v)
 		}
@@ -486,11 +486,7 @@ func (h Hotkeys) Validate() error {
 			return errors.New("invalid hotkey definition: " + k)
 		}
 	}
-	return nil
-}
-
-func (h TUIHotkeys) Validate() error {
-	for _, v := range h {
+	for _, v := range h.TUI {
 		if !slices.Contains(tuiHotkeyActions, v) {
 			return errors.New("unknown tui hotkey action: " + v)
 		}
@@ -499,7 +495,7 @@ func (h TUIHotkeys) Validate() error {
 }
 
 func (h Hotkeys) ToJSON() template.JS {
-	b, err := json.Marshal(h)
+	b, err := json.Marshal(h.Web)
 	if err != nil {
 		return template.JS("")
 	}
