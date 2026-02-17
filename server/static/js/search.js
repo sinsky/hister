@@ -606,13 +606,14 @@ function showHotkeys(e) {
     const toggleSection = `
         <div class="hotkey-toggle-section mt-1">
             <p>The hotkey button can be toggled using the button below. You can always press <kbd>?</kbd> to view this popup.</p>
-            <button class="hotkey-toggle-btn mt-1" onclick="toggleHotkeyButton()">
+            <button class="hotkey-toggle-btn mt-1">
                 ${hideButton ? 'Show Hotkey Button' : 'Hide Hotkey Button'}
             </button>
         </div>
     `;
 
     openPopup("<h2>Hotkeys</h2>", c.innerHTML + toggleSection);
+    document.querySelector('.hotkey-toggle-btn').addEventListener('click', toggleHotkeyButton);
 }
 
 function toggleHotkeyButton() {
