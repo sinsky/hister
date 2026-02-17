@@ -32,10 +32,16 @@
         </div>
         <div>Total number of results: <b class="results-num"></b></div>
         <div class="expanded-query"></div>
+        <div class="sort-buttons">
+            Sort by: <span class="sort-options-container"></span>
+        </div>
         <div class="export-buttons">
             Export: <a class="export-json">JSON</a> | <a class="export-csv">CSV</a> | <a class="export-rss">RSS</a>
         </div>
     </div>
+</template>
+<template id="sort-option">
+    <a class="sort-btn"></a><span class="sort-separator"> | </span>
 </template>
 <template id="tips">
 <div class="text-center">

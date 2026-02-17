@@ -511,3 +511,23 @@ mark {
 .export-buttons a:hover {
     text-decoration: underline;
 }
+
+.sort-buttons {
+    margin-top: 0.3em;
+    font-size: 0.85em;
+    color: var(--color-semilight);
+}
+
+.sort-buttons a.sort-btn {
+    cursor: pointer;
+    color: var(--color-blue);
+}
+
+.sort-buttons a.sort-btn:hover {
+    text-decoration: underline;
+}
+
+.sort-buttons a.sort-btn.active {
+    color: var(--color-light);
+    font-weight: bold;
+}

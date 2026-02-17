@@ -8,7 +8,13 @@ let openResultsOnNewTab = document.getElementById("open-results-on-new-tab").val
 let emptyImg = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
 let urlState = {};
 let lastResults = null;
+let currentSort = "";
 let templates = {};
+
+const SORT_OPTIONS = [
+    { id: "", label: "Relevance" },
+    { id: "domain", label: "Domain" }
+];
 for(let el of document.querySelectorAll("template")) {
     let id = el.getAttribute("id")
     templates[id] = el;
@@ -98,6 +104,9 @@ function updateConnectionStatus(connected) {
 
 function sendQuery(q) {
     let message = {"text": q, "highlight": "HTML"};
+    if(currentSort) {
+        message.sort = currentSort;
+    }
     ws.send(JSON.stringify(message));
 }
 
@@ -157,6 +166,16 @@ input.addEventListener("input", () => {
 function handleInput() {
     updateURL();
     sendQuery(input.value);
+}
+
+function setSort(sortId) {
+    if(currentSort === sortId) {
+        return;
+    }
+    currentSort = sortId;
+    if(input.value) {
+        sendQuery(input.value);
+    }
 }
 
 function createTips() {
@@ -279,6 +298,28 @@ function createResultsHeader(res) {
         ".export-json": (e) => e.addEventListener("click", () => exportJSON()),
         ".export-csv": (e) => e.addEventListener("click", () => exportCSV()),
         ".export-rss": (e) => e.addEventListener("click", () => exportRSS()),
+        ".sort-options-container": (container) => {
+            SORT_OPTIONS.forEach((opt, index) => {
+                let btnNode = createTemplate("sort-option", {
+                    ".sort-btn": (e) => {
+                        e.innerText = opt.label;
+                        e.dataset.sortId = opt.id;
+                        
+                        if (currentSort === opt.id) {
+                            e.classList.add("active");
+                        }
+                        
+                        e.addEventListener("click", () => setSort(opt.id));
+                    },
+                    ".sort-separator": (e) => {
+                        if (index === SORT_OPTIONS.length - 1) {
+                            e.remove(); 
+                        }
+                    }
+                });
+                container.appendChild(btnNode);
+            });
+        },
         "#external-search-link": (e) => {
             if(input.value.trim()) {
                 e.href = getSearchUrl(input.value);

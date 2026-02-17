@@ -46,6 +46,7 @@ type Query struct {
 	Highlight string   `json:"highlight"`
 	Fields    []string `json:"fields"`
 	Limit     int      `json:"limit"`
+	Sort      string   `json:"sort"`
 	base      query.Query
 	boostVal  *query.Boost
 	cfg       *config.Config
@@ -192,7 +193,10 @@ func Search(cfg *config.Config, q *Query) (*Results, error) {
 	case "tui":
 		req.Highlight = bleve.NewHighlightWithStyle("tui")
 	}
-
+	switch q.Sort {
+	case "domain":
+		req.SortBy([]string{"domain"})
+	}
 	res, err := i.idx.Search(req)
 	if err != nil {
 		return nil, err
