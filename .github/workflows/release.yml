@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   build:
+    if: github.repository == 'asciimoo/hister'
     name: GoReleaser build
     runs-on: ubuntu-latest
     container:

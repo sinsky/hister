@@ -17,6 +17,7 @@ permissions:
 
 jobs:
   update-vendor-hash:
+    if: github.repository == 'asciimoo/hister'
     runs-on: ubuntu-latest
 
     steps:
