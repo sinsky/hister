@@ -6,7 +6,7 @@
         <div id="ws-status" class="ws-status" title="Websocket disconnected"></div>
     </div>
 </div>
-<details class="section">
+<details class="section hidden" id="actions-details">
     <summary>Actions</summary>
     <div class="container">
         <div class="sort-buttons small-grey">

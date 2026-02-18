@@ -131,10 +131,11 @@ function renderResults(event) {
     lastResults = res;
     const d = res.documents;
     updateAutocomplete(res.query_suggestion);
-    if(!d && !res.history) {
+    if(!d?.length && !res.history) {
+        document.getElementById("actions-details").classList.add("hidden");
         if(!input.value) {
             results.replaceChildren(createTips());
-            return
+            return;
         }
         let u = getSearchUrl(input.value)
         let n = createTemplate("result", {
@@ -144,6 +145,7 @@ function renderResults(event) {
         results.replaceChildren(n);
         return;
     }
+    document.getElementById("actions-details").classList.remove("hidden");
     let resultElements = [];
     highlightIdx = 0;
     resultElements.push(createResultsHeader(res));
