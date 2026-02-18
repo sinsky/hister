@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html"
 	"io"
 	"net/http"
 	"net/url"
@@ -287,6 +288,7 @@ func (d *Document) Process() error {
 	if err := d.extractHTML(); err != nil {
 		return err
 	}
+	d.Title = html.EscapeString(d.Title)
 	d.processed = true
 	return nil
 }
