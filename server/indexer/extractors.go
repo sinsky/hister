@@ -66,7 +66,7 @@ out:
 			switch currentTag {
 			case "body":
 				inBody = true
-			case "script", "style":
+			case "script", "style", "noscript":
 				skip = true
 			}
 		case html.TextToken:
@@ -81,7 +81,7 @@ out:
 			switch string(tn) {
 			case "body":
 				inBody = false
-			case "script", "style":
+			case "script", "style", "noscript":
 				skip = false
 			}
 		}
