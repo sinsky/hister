@@ -206,6 +206,9 @@ var reindexCmd = &cobra.Command{
 	Use:   "reindex",
 	Short: "Reindex",
 	Long:  `Recreate index - server should be stopped`,
+	PreRun: func(_ *cobra.Command, _ []string) {
+		initDB()
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		skipSensitive := false
 		if b, err := cmd.Flags().GetBool("exclude-sensitive"); err == nil {
