@@ -36,7 +36,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var Version = 0
+var Version = 1
 
 type indexer struct {
 	idx bleve.Index
@@ -341,12 +341,7 @@ func docFromHit(h *search.DocumentMatch) *Document {
 }
 
 func (d *Document) extractHTML() error {
-	for _, e := range extractors {
-		if e.Match(d) {
-			return e.Extract(d)
-		}
-	}
-	return errors.New("no extractor found")
+	return Extract(d)
 }
 
 func (d *Document) DownloadFavicon() error {

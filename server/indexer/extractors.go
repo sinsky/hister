@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"net/url"
 	"strings"
 
+	readability "codeberg.org/readeck/go-readability/v2"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/net/html"
 )
 
@@ -20,11 +23,27 @@ var extractors []Extractor = []Extractor{
 
 type defaultExtractor struct{}
 
+type readabilityExtractor struct{}
+
+func Extract(d *Document) error {
+	for _, e := range extractors {
+		if e.Match(d) {
+			if err := e.Extract(d); err != nil {
+				log.Warn().Err(err).Msg("Failed to extract content")
+			} else {
+				return nil
+			}
+		}
+	}
+	return errors.New("no extractor found")
+}
+
 func (e *defaultExtractor) Match(_ *Document) bool {
 	return true
 }
 
 func (e *defaultExtractor) Extract(d *Document) error {
+	d.Title = ""
 	r := bytes.NewReader([]byte(d.HTML))
 	doc := html.NewTokenizer(r)
 	inBody := false
@@ -42,34 +61,13 @@ out:
 			}
 			return errors.New("failed to parse html: " + err.Error())
 		case html.SelfClosingTagToken, html.StartTagToken:
-			tn, hasAttrs := doc.TagName()
+			tn, _ := doc.TagName()
 			currentTag = string(tn)
 			switch currentTag {
 			case "body":
 				inBody = true
 			case "script", "style":
 				skip = true
-			case "link":
-				var href string
-				icon := false
-				if !hasAttrs {
-					break
-				}
-				for {
-					aName, aVal, moreAttr := doc.TagAttr()
-					if bytes.Equal(aName, []byte("href")) {
-						href = string(aVal)
-					}
-					if bytes.Equal(aName, []byte("rel")) && bytes.Contains(aVal, []byte("icon")) {
-						icon = true
-					}
-					if !moreAttr {
-						break
-					}
-				}
-				if icon && href != "" {
-					d.faviconURL = fullURL(d.URL, href)
-				}
 			}
 		case html.TextToken:
 			if currentTag == "title" {
@@ -95,5 +93,29 @@ out:
 	if d.Title == "" {
 		return errors.New("no title found")
 	}
+	return nil
+}
+
+func (e *readabilityExtractor) Match(_ *Document) bool {
+	return true
+}
+
+func (e *readabilityExtractor) Extract(d *Document) error {
+	r := bytes.NewReader([]byte(d.HTML))
+
+	u, err := url.Parse(d.URL)
+	if err != nil {
+		return err
+	}
+	a, err := readability.FromReader(r, u)
+	if err != nil {
+		return err
+	}
+	buf := bytes.NewBuffer(nil)
+	if err := a.RenderText(buf); err != nil {
+		return err
+	}
+	d.Text = buf.String()
+	d.Title = a.Title()
 	return nil
 }
