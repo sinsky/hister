@@ -18,6 +18,7 @@ type Extractor interface {
 }
 
 var extractors []Extractor = []Extractor{
+	&readabilityExtractor{},
 	&defaultExtractor{},
 }
 
