@@ -286,6 +286,12 @@ func serveIndex(c *webContext) {
 }
 
 func serveSearch(c *webContext) {
+	origin := c.Request.Header.Get("Origin")
+	if !c.Config.IsSameHost(origin) {
+		serve500(c)
+		log.Info().Str("Origin", origin).Msg("Invalid origin")
+		return
+	}
 	q := c.Request.URL.Query().Get("q")
 	if q != "" {
 		// Go uses a reference time (2006-01-02 15:04:05)

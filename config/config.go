@@ -335,6 +335,20 @@ func (c *Config) BaseURL(u string) string {
 	return c.Server.BaseURL + u
 }
 
+func (c *Config) IsSameHost(h string) bool {
+	b := c.BaseURL("")
+	if strings.HasPrefix(b, "http://127.0.0.1") {
+		return strings.HasPrefix(b, h) || strings.HasPrefix(strings.Replace(b, "127.0.0.1", "localhost", 1), h)
+	}
+	if strings.HasPrefix(b, "http://localhost") {
+		return strings.HasPrefix(b, h) || strings.HasPrefix(strings.Replace(b, "localhost", "127.0.0.1", 1), h)
+	}
+	if strings.HasPrefix(b, h) {
+		return true
+	}
+	return false
+}
+
 func (c *Config) Host() string {
 	u, err := url.Parse(c.Server.BaseURL)
 	if err != nil {
