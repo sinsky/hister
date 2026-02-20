@@ -1,7 +1,6 @@
 package indexer
 
 import (
-	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -16,9 +15,8 @@ import (
 	"time"
 
 	"github.com/asciimoo/hister/config"
+	"github.com/asciimoo/hister/server/indexer/querybuilder"
 	"github.com/asciimoo/hister/server/model"
-
-	"golang.org/x/net/idna"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
@@ -30,8 +28,6 @@ import (
 	simpleFragmenter "github.com/blevesearch/bleve/v2/search/highlight/fragmenter/simple"
 	simpleHighlighter "github.com/blevesearch/bleve/v2/search/highlight/highlighter/simple"
 	"github.com/blevesearch/bleve/v2/search/query"
-	"github.com/blevesearch/bleve/v2/search/searcher"
-	index "github.com/blevesearch/bleve_index_api"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/rs/zerolog/log"
 )
@@ -43,15 +39,12 @@ type indexer struct {
 }
 
 type Query struct {
-	Text      string   `json:"text"`
-	Highlight string   `json:"highlight"`
-	Fields    []string `json:"fields"`
-	Limit     int      `json:"limit"`
-	Sort      string   `json:"sort"`
-	DateFrom  int64    `json:"date_from"`
-	DateTo    int64    `json:"date_to"`
-	base      query.Query
-	boostVal  *query.Boost
+	Text      string `json:"text"`
+	Highlight string `json:"highlight"`
+	Limit     int    `json:"limit"`
+	Sort      string `json:"sort"`
+	DateFrom  int64  `json:"date_from"`
+	DateTo    int64  `json:"date_to"`
 	cfg       *config.Config
 }
 
@@ -180,7 +173,7 @@ func Delete(u string) error {
 func Search(cfg *config.Config, q *Query) (*Results, error) {
 	q.cfg = cfg
 	req := bleve.NewSearchRequest(q.create())
-	req.Fields = q.Fields
+	req.Fields = allFields
 
 	if q.Limit > 0 {
 		req.Size = q.Limit
@@ -380,64 +373,8 @@ func (d *Document) DownloadFavicon() error {
 }
 
 func (q *Query) create() query.Query {
-	if len(q.Fields) == 0 {
-		q.Fields = allFields
-	}
-
-	// add + to phrases to force matching phrases
-	qp := strings.Fields(q.Text)
-
-	if len(qp) == 0 {
-		q.base = query.NewMatchNoneQuery()
-		return q
-	}
-
-	domainCandidate := qp[0]
-
-	inQuote := false
-	for i, s := range qp {
-		if len(s) == 0 {
-			continue
-		}
-		if !inQuote && (s[0] == '-' || s[0] == '+') {
-			continue
-		}
-		if !inQuote {
-			qp[i] = "+" + qp[i]
-		}
-		quotes := strings.Count(s, "\"")
-		if quotes%2 == 1 {
-			inQuote = !inQuote
-		}
-	}
-
-	sqs := strings.Join(qp, " ")
 	var sq query.Query
-	sq = bleve.NewQueryStringQuery(sqs)
-
-	if d, err := idna.Lookup.ToASCII(domainCandidate); err == nil {
-		dq := bleve.NewRegexpQuery(fmt.Sprintf(".*%s.*", d))
-		dq.SetField("domain")
-		dq.SetBoost(100)
-		if len(qp) == 1 {
-			// match domain part or QueryString in title/text
-			sq = bleve.NewDisjunctionQuery(
-				sq,
-				dq,
-			)
-		} else {
-			// match QueryString in title/text OR (first word as domain part AND the rest of the query as QueryString in title/text)
-			sq = bleve.NewDisjunctionQuery(
-				sq,
-				bleve.NewConjunctionQuery(
-					dq,
-					bleve.NewQueryStringQuery(strings.Join(qp[1:], "")),
-				),
-			)
-		}
-	}
-
-	q.base = sq
+	sq = querybuilder.Build(q.Text)
 
 	if q.DateFrom != 0 || q.DateTo != 0 {
 		if q.DateFrom != 0 && q.DateTo == 0 {
@@ -454,10 +391,10 @@ func (q *Query) create() query.Query {
 		}
 		dateQuery := bleve.NewNumericRangeQuery(min, max)
 		dateQuery.SetField("added")
-		q.base = bleve.NewConjunctionQuery(q.base, dateQuery)
+		sq = bleve.NewConjunctionQuery(sq, dateQuery)
 	}
 
-	return q
+	return sq
 }
 
 func createMapping() mapping.IndexMapping {
@@ -497,61 +434,9 @@ func createMapping() mapping.IndexMapping {
 	return im
 }
 
-func (q *Query) SetBoost(b float64) {
-	boost := query.Boost(b)
-	q.boostVal = &boost
-}
-
-func (q *Query) Boost() float64 {
-	return q.boostVal.Value()
-}
-
 func (q *Query) ToJSON() []byte {
 	r, _ := json.Marshal(q)
 	return r
-}
-
-func (q *Query) Searcher(ctx context.Context, i index.IndexReader, m mapping.IndexMapping, options search.SearcherOptions) (search.Searcher, error) {
-	bs, err := q.base.Searcher(ctx, i, m, options)
-	if err != nil {
-		return nil, err
-	}
-	dvReader, err := i.DocValueReader(q.Fields)
-	if err != nil {
-		return nil, err
-	}
-	return searcher.NewFilteringSearcher(ctx, bs, q.makeFilter(dvReader)), nil
-}
-
-func (q *Query) makeFilter(dvReader index.DocValueReader) searcher.FilterFunc {
-	boost := q.Boost()
-	return func(sctx *search.SearchContext, d *search.DocumentMatch) bool {
-		isPartOfMatch := make(map[string]bool, len(d.FieldTermLocations))
-		for _, ftloc := range d.FieldTermLocations {
-			isPartOfMatch[ftloc.Field] = true
-		}
-		seenFields := make(map[string]any, len(d.Fields))
-		_ = dvReader.VisitDocValues(d.IndexInternalID, func(field string, term []byte) {
-			if _, seen := seenFields[field]; seen {
-				return
-			}
-			seenFields[field] = struct{}{}
-			b := q.score(field, term, isPartOfMatch[field])
-			d.Score *= boost * b
-		})
-		return true
-	}
-}
-
-func (q *Query) score(field string, term []byte, match bool) float64 {
-	var s float64 = 1
-	if field == "title" && match {
-		s *= 10
-	}
-	if field == "url" && q.cfg.Rules.IsPriority(string(term)) {
-		s *= 10
-	}
-	return s
 }
 
 func fullURL(base, u string) string {
