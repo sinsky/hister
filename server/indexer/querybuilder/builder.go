@@ -25,25 +25,32 @@ func Build(s string) query.Query {
 	}
 
 	qs := []query.Query{}
+	nqs := []query.Query{}
 
 	for _, t := range qt {
-		qs = append(qs, getTokenQuery(t))
+		q, negated := getTokenQuery(t)
+		if negated {
+			nqs = append(nqs, q)
+		} else {
+			qs = append(qs, q)
+		}
 	}
-	return bleve.NewConjunctionQuery(qs...)
+	return query.NewBooleanQuery(qs, nil, nqs)
 }
 
 func createSimpleQuery(s string) query.Query {
 	return bleve.NewQueryStringQuery(s)
 }
 
-func getTokenQuery(t Token) query.Query {
+func getTokenQuery(t Token) (query.Query, bool) {
+	negated := false
 	switch t.Type {
 	case TokenQuoted:
 		titleq := bleve.NewPhraseQuery(strings.Fields(t.Value), "title")
 		titleq.SetBoost(weights["title"])
 		textq := bleve.NewPhraseQuery(strings.Fields(t.Value), "text")
 		textq.SetBoost(weights["text"])
-		return bleve.NewDisjunctionQuery(titleq, textq)
+		return bleve.NewDisjunctionQuery(titleq, textq), negated
 	case TokenWord:
 		var field string
 		for f := range weights {
@@ -54,16 +61,25 @@ func getTokenQuery(t Token) query.Query {
 		}
 		if field != "" {
 			v := t.Value[len(field)+1:]
+			if strings.HasPrefix(v, "-") {
+				negated = true
+				v = v[1:]
+			}
 			if strings.Contains(v, "*") {
 				q := bleve.NewWildcardQuery(v)
 				q.SetField(field)
 				q.SetBoost(weights[field])
-				return q
+				return q, negated
 			}
 			q := bleve.NewTermQuery(v)
 			q.SetField(field)
 			q.SetBoost(weights[field])
-			return q
+			return q, negated
+		}
+
+		if strings.HasPrefix(t.Value, "-") {
+			negated = true
+			t.Value = t.Value[1:]
 		}
 
 		qs := []query.Query{}
@@ -80,10 +96,13 @@ func getTokenQuery(t Token) query.Query {
 				qs = append(qs, q)
 			}
 		}
-
 		wcq := t.Value
 		if !strings.Contains(t.Value, "*") {
-			wcq = "*" + wcq + "*"
+			if negated {
+				wcq = "*" + wcq[1:] + "*"
+			} else {
+				wcq = "*" + wcq + "*"
+			}
 		}
 
 		urlq := bleve.NewWildcardQuery(wcq)
@@ -95,14 +114,15 @@ func getTokenQuery(t Token) query.Query {
 		domainq.SetField("domain")
 		domainq.SetBoost(weights["domain"])
 		qs = append(qs, domainq)
+		return bleve.NewDisjunctionQuery(qs...), negated
 
-		return bleve.NewDisjunctionQuery(qs...)
 	case TokenAlternation:
 		qs := []query.Query{}
 		for _, p := range t.Parts {
-			qs = append(qs, getTokenQuery(p))
+			r, _ := getTokenQuery(p)
+			qs = append(qs, r)
 		}
-		return bleve.NewDisjunctionQuery(qs...)
+		return bleve.NewDisjunctionQuery(qs...), negated
 	}
-	return bleve.NewQueryStringQuery(t.Value)
+	return bleve.NewQueryStringQuery(t.Value), negated
 }
