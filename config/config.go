@@ -336,17 +336,24 @@ func (c *Config) BaseURL(u string) string {
 }
 
 func (c *Config) IsSameHost(h string) bool {
-	b := c.BaseURL("")
-	if strings.HasPrefix(b, "http://127.0.0.1") {
-		return strings.HasPrefix(b, h) || strings.HasPrefix(strings.Replace(b, "127.0.0.1", "localhost", 1), h)
+	bu, err := url.Parse(c.BaseURL(""))
+	if err != nil {
+		return false
 	}
-	if strings.HasPrefix(b, "http://localhost") {
-		return strings.HasPrefix(b, h) || strings.HasPrefix(strings.Replace(b, "localhost", "127.0.0.1", 1), h)
+	ru, err := url.Parse(h)
+	if err != nil {
+		return false
 	}
-	if strings.HasPrefix(b, h) {
-		return true
+	if ru.Scheme != bu.Scheme {
+		return false
 	}
-	return false
+	if ru.Port() != bu.Port() {
+		return false
+	}
+	if bu.Hostname() == "127.0.0.1" || bu.Hostname() == "localhost" {
+		return ru.Hostname() == "127.0.0.1" || ru.Hostname() == "localhost"
+	}
+	return bu.Hostname() == ru.Hostname()
 }
 
 func (c *Config) Host() string {
