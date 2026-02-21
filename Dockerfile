@@ -1,29 +1,70 @@
-FROM golang:1.24
+FROM golang:1.24-bookworm AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libc6-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Switch workdir do build directory
-WORKDIR /hister/build
+WORKDIR /app
 
 COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN go build
 
-# Switch workdir to final destination
+# Enable CGO and build the application for Linux
+RUN CGO_ENABLED=1 GOOS=linux go build \
+    -ldflags="-s -w" \
+    -o hister .
+
+# Release stage(distroless-nonroot)
+# latest & vx.x.x
+FROM gcr.io/distroless/base-debian12:nonroot AS release
 WORKDIR /hister
 
-# Copy binary, remove build dir
-RUN cp ./build/hister .
-RUN rm -rf ./build
+COPY --from=builder /app/hister .
 
-# Install required utilities for user/group management
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gosu \
-    && rm -rf /var/lib/apt/lists/*
+USER 65532:65532
 
-
-#VOLUME $HOME/.config/hister/
+ENV HISTER_DATA_DIR=/hister/data
+ENV HISTER_CONFIG=/hister/data/config.yml
 
 EXPOSE 4433
 
-CMD ["/hister/hister", "listen"]
+ENTRYPOINT ["/hister/hister"]
+CMD ["listen"]
+
+# Release stage(distroless)
+# latest-root & vx.x.x-root
+FROM gcr.io/distroless/base-debian12 AS root
+WORKDIR /hister
+
+COPY --from=builder /app/hister .
+
+USER root
+
+ENV HISTER_DATA_DIR=/hister/data
+ENV HISTER_CONFIG=/hister/data/config.yml
+
+EXPOSE 4433
+
+ENTRYPOINT ["/hister/hister"]
+CMD ["listen"]
+
+# Release stage(distroless-debug)
+# latest-debug & vx.x.x-debug
+FROM gcr.io/distroless/base-debian12:debug AS debug
+WORKDIR /hister
+
+COPY --from=builder /app/hister .
+
+USER root
+
+ENV HISTER_DATA_DIR=/hister/data
+ENV HISTER_CONFIG=/hister/data/config.yml
+
+EXPOSE 4433
+
+ENTRYPOINT ["/hister/hister"]
+CMD ["listen"]

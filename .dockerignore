@@ -1,0 +1,46 @@
+# Git & CI
+.git
+.github
+.gitignore
+.golangci.toml
+.goreleaser.yml
+manage.sh
+
+# OS & Editor
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.bak
+
+# Go Build Artifacts
+hister
+hister.exe
+pkg/
+bin/
+vendor/
+
+# Local Data & Configs
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+config.yml
+rules.json
+.secret_key
+data/
+
+# Documentation & Assets
+docs/
+README.md
+LICENSE
+Dockerfile*
+compose.yml
+
+# Browser Extension & Nix
+ext/
+node_modules/
+package-lock.json
+flake.nix
+flake.lock
+nix/
