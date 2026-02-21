@@ -10,7 +10,7 @@
     {{ end }}
   {{ end }}
 <div class="sidebar">
-  {{ range $pages }}
+  {{ range $pages.Reverse }}
     <section>
         <a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
     </section>
