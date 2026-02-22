@@ -205,7 +205,7 @@ var deleteCmd = &cobra.Command{
 var reindexCmd = &cobra.Command{
 	Use:   "reindex",
 	Short: "Reindex",
-	Long:  `Recreate index - server should be stopped`,
+	Long:  `Recreate index - server should be running`,
 	PreRun: func(_ *cobra.Command, _ []string) {
 		initDB()
 	},
