@@ -1,6 +1,9 @@
 name: Release binaries
 
-on: [push]
+on:
+  push:
+    tags:
+      - '*'
 
 permissions:
   contents: write
@@ -13,11 +16,6 @@ jobs:
     container:
       image: goreleaser/goreleaser-cross:v1.25.5
     steps:
-      - name: Tag commit
-        uses: tvdias/github-tagger@v0.0.1
-        with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          tag: "latest"
       - name: Checkout
         uses: actions/checkout@v4
         with:
