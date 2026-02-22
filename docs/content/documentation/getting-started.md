@@ -87,18 +87,18 @@ You can import your existing browser history from Firefox or Chrome:
 ### Firefox
 
 ```bash
-./hister import firefox
+./hister import firefox [db path]
 ```
 
-This will automatically locate and import your Firefox history.
+On linux DB path can be usually found at `/home/[USER]/.mozilla/[PROFILE]/places.sqlite`
 
 ### Chrome
 
 ```bash
-./hister import chrome
+./hister import chrome [db path]
 ```
 
-This will automatically locate and import your Chrome history.
+On linux DB path can be usually found at `/home/[USER]/.config/chromium/Default/History`
 
 ## Command Line Usage
 
@@ -189,7 +189,7 @@ Note: After modifying your config file, restart the `hister search` command to a
 
 ### Import fails
 
-- Ensure your server isn't running during import
+- Ensure your server is running during import
 
 ## Nix
 
