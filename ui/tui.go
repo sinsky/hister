@@ -103,8 +103,8 @@ type searchQuery struct {
 
 type resultsMsg struct{ results *indexer.Results }
 type errMsg struct{ err error }
-type wsConnectedMsg struct{}
-type wsDisconnectedMsg struct{}
+type wsConnectedMsg struct{ conn *websocket.Conn }
+type wsDisconnectedMsg struct{ err error }
 type reconnectMsg struct{}
 
 type tuiModel struct {
@@ -126,6 +126,7 @@ type tuiModel struct {
 	wsReady       bool
 	dialogMsg     string
 	dialogConfirm func() tea.Cmd
+	connError     error
 }
 
 func initialModel(cfg *config.Config) *tuiModel {
@@ -219,10 +220,16 @@ func (m *tuiModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.scrollToSelected()
 		return m, m.listenToWebSocket()
 	case wsConnectedMsg:
-		m.wsReady = true
+		if msg.conn != nil {
+			m.conn = msg.conn
+			m.wsReady = true
+		}
 		return m, m.listenToWebSocket()
 	case wsDisconnectedMsg:
 		m.wsReady = false
+		if msg.err != nil {
+			m.connError = msg.err
+		}
 		return m, tea.Tick(2*time.Second, func(_ time.Time) tea.Msg { return reconnectMsg{} })
 	case reconnectMsg:
 		return m, m.connectWebSocket()
@@ -440,6 +447,9 @@ func (m *tuiModel) renderStatusBar() string {
 		count = int(m.results.Total)
 	}
 	left := " " + cs + mode + "  " + fmt.Sprintf("%d results", count)
+	if m.connError != nil {
+		left += " - " + discStyle.Render(m.connError.Error())
+	}
 	right := "Press ? for help "
 
 	targetW := max(1, m.width-1)
@@ -608,22 +618,27 @@ func (m *tuiModel) getSelectedURL() string {
 
 func (m *tuiModel) connectWebSocket() tea.Cmd {
 	return func() tea.Msg {
-		conn, _, err := websocket.DefaultDialer.Dial(m.cfg.WebSocketURL(), nil)
+		wsURL := m.cfg.WebSocketURL()
+		header := http.Header{}
+		header.Set("Origin", m.cfg.BaseURL(""))
+		conn, _, err := websocket.DefaultDialer.Dial(wsURL, header)
 		if err != nil {
-			return wsDisconnectedMsg{}
+			return wsDisconnectedMsg{err: err}
 		}
-		m.conn = conn
+		wsDone := m.wsDone
+		wsChan := m.wsChan
 		go func() {
+			defer conn.Close()
 			for {
 				select {
-				case <-m.wsDone:
+				case <-wsDone:
 					return
 				default:
 					_, data, err := conn.ReadMessage()
 					if err != nil {
 						select {
-						case m.wsChan <- wsDisconnectedMsg{}:
-						case <-m.wsDone:
+						case wsChan <- wsDisconnectedMsg{err: err}:
+						case <-wsDone:
 						}
 						return
 					}
@@ -635,14 +650,14 @@ func (m *tuiModel) connectWebSocket() tea.Cmd {
 						res = &indexer.Results{}
 					}
 					select {
-					case m.wsChan <- resultsMsg{results: res}:
-					case <-m.wsDone:
+					case wsChan <- resultsMsg{results: res}:
+					case <-wsDone:
 						return
 					}
 				}
 			}
 		}()
-		return wsConnectedMsg{}
+		return wsConnectedMsg{conn: conn}
 	}
 }
 
@@ -677,9 +692,6 @@ func (m *tuiModel) deleteURL(u string) tea.Cmd {
 
 func (m *tuiModel) close() {
 	close(m.wsDone)
-	if m.conn != nil {
-		m.conn.Close()
-	}
 }
 
 func SearchTUI(cfg *config.Config) error {
