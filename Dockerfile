@@ -12,10 +12,10 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Install Node.js and npm for static asset build
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    nodejs \
-    npm \
-    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
+RUN . "$HOME/.nvm/nvm.sh"
+RUN nvm install 24
 
 # Build static assets
 COPY . .
