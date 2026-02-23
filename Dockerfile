@@ -11,6 +11,13 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
+# Install Node.js and npm for static asset build
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    nodejs \
+    npm \
+    && rm -rf /var/lib/apt/lists/*
+
+# Build static assets
 COPY . .
 
 # Enable CGO and build the application for Linux

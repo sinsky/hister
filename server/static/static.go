@@ -3,7 +3,7 @@ package static
 import "embed"
 
 //go:embed favicon.ico
-//go:embed js/*.js
+//go:embed js/dist/*.js
 //go:embed logo.png
 //go:embed style.css
 

@@ -249,7 +249,7 @@ func serveIndex(c *webContext) {
 			return
 		}
 	}
-	c.Render("index", nil)
+	c.Render("index", tArgs{"Query": q, "WebSocketURL": c.Config.WebSocketURL()})
 }
 
 func serveSearch(c *webContext) {
@@ -481,7 +481,17 @@ func serveReadable(c *webContext) {
 		serve500(c)
 		return
 	}
-	r.RenderHTML(c.Response)
+	var htmlContent strings.Builder
+	r.RenderHTML(&htmlContent)
+	title := doc.Title
+	if r.Title() != "" {
+		title = r.Title()
+	}
+	c.Response.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(c.Response).Encode(map[string]string{
+		"title":   title,
+		"content": htmlContent.String(),
+	})
 }
 
 func serveHelp(c *webContext) {

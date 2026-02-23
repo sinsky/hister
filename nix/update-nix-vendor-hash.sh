@@ -2,28 +2,56 @@
 
 set -euo pipefail
 
-echo "::notice::Running nix build to get vendorHash..."
-echo "::group::Build output"
+PACKAGE_FILE="nix/package.nix"
+
+update_hash() {
+  local output="$1"
+  local attempt="$2"
+  
+  if echo "$output" | grep -q "hash mismatch in fixed-output derivation"; then
+    EXPECTED_HASH=$(echo "$output" | grep "expected:" | sed 's/.*expected: *//')
+    GOT_HASH=$(echo "$output" | grep "got:" | sed 's/.*got: *//')
+    
+    echo "::notice::Attempt $attempt - Expected: $EXPECTED_HASH"
+    echo "::notice::Attempt $attempt - Got:      $GOT_HASH"
+    
+    if echo "$output" | grep -q "goModules"; then
+      echo "::notice::Updating vendorHash"
+      sed -i.bak "s|$EXPECTED_HASH|$GOT_HASH|g" "$PACKAGE_FILE"
+      rm -f "$PACKAGE_FILE.bak"
+      echo "updated"
+    elif echo "$output" | grep -q "npmDeps"; then
+      echo "::notice::Updating npmDeps hash"
+      sed -i.bak "s|$EXPECTED_HASH|$GOT_HASH|g" "$PACKAGE_FILE"
+      rm -f "$PACKAGE_FILE.bak"
+      echo "updated"
+    fi
+  fi
+}
+
+echo "::notice::Running nix build to check for hash mismatches..."
+
+# nix hash
+echo "::group::Build attempt 1"
 OUTPUT=$(nix build .#hister 2>&1 || true)
+echo "$OUTPUT"
 echo "::endgroup::"
 
-if echo "$OUTPUT" | grep -q "hash mismatch in fixed-output derivation"; then
-  NEW_HASH=$(echo "$OUTPUT" | grep "got:" | sed 's/.*got: *//')
-  echo "::notice::Found new hash: $NEW_HASH"
-  
-  sed -i.bak "s|vendorHash = \".*\";|vendorHash = \"$NEW_HASH\";|" nix/package.nix
-  rm -f nix/package.nix.bak
-  
-  echo "::notice file=nix/package.nix::Updated vendorHash"
-  
-  echo "::group::Verifying build with new hash"
-  nix build .#hister 2>&1 | tail -5
-  echo "::endgroup::"
-  echo "::notice::Build successful!"
-else
-  echo "::notice::No hash mismatch found or build succeeded already"
-  if echo "$OUTPUT" | grep -q "these 2 derivations will be built"; then
-    echo "::notice::Build already passes, no update needed"
-  fi
-  exit 0
+RESULT1=$(update_hash "$OUTPUT" "1")
+
+# npm hash
+echo "::group::Build attempt 2"
+OUTPUT=$(nix build .#hister 2>&1 || true)
+echo "$OUTPUT"
+echo "::endgroup::"
+
+RESULT2=$(update_hash "$OUTPUT" "2")
+
+if [ -n "$RESULT1" ] || [ -n "$RESULT2" ]; then
+  echo "::notice::Updated vendorHash and/or npmDeps"
 fi
+
+echo "::group::Verifying final build"
+nix build .#hister 2>&1 | tail -5
+echo "::endgroup::"
+echo "::notice::Build successful!"

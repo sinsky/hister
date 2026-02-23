@@ -239,6 +239,7 @@ func GetByURL(u string) *Document {
 	q.SetField("url")
 	req := bleve.NewSearchRequest(q)
 	req.Fields = allFields
+	req.Highlight = bleve.NewHighlight()
 	res, err := i.idx.Search(req)
 	if err != nil || len(res.Hits) < 1 {
 		return nil
@@ -313,14 +314,16 @@ func Iterate(fn func(*Document)) {
 
 func docFromHit(h *search.DocumentMatch) *Document {
 	d := &Document{}
-	if s, ok := h.Fields["title"].(string); ok {
+	if t, ok := h.Fragments["title"]; ok {
+		d.Title = t[0]
+	} else if s, ok := h.Fields["title"].(string); ok {
 		d.Title = s
 	}
 	if s, ok := h.Fields["url"].(string); ok {
 		d.URL = s
 	}
-	if s, ok := h.Fields["text"].(string); ok {
-		d.Text = s
+	if t, ok := h.Fragments["text"]; ok {
+		d.Text = t[0]
 	}
 	if s, ok := h.Fields["html"].(string); ok {
 		d.HTML = s

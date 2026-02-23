@@ -44,7 +44,7 @@
             <a href="/api">API</a> |
             <a href="https://github.com/asciimoo/hister/">GitHub</a>
         </footer>
-        <script src="/static/js/site.js" nonce="{{ .Nonce }}"></script>
+        <script src="/static/js/dist/site.js" nonce="{{ .Nonce }}"></script>
     </body>
 </html>
 {{- end -}}

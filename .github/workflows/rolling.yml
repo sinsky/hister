@@ -59,10 +59,10 @@ jobs:
         with:
           path: dist/
 
-      - name: Force Update 'latest' Tag
+      - name: Force Update 'Rolling' Tag
         run: |
-          git tag -f latest
-          git push origin latest --force
+          git tag -f rolling
+          git push origin rolling --force
 
       - name: Generate release body
         id: release_body
@@ -76,7 +76,7 @@ jobs:
       - name: Update Latest Release
         uses: softprops/action-gh-release@v2.5.0
         with:
-          tag_name: latest
+          tag_name: rolling
           name: "Hister (Dev Build)"
           body: ${{ steps.release_body.outputs.body }}
           prerelease: true

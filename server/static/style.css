@@ -370,7 +370,7 @@ table {
             height: 1.6em;
             width: 1.6em;
             margin: 0;
-            margin-right: 0.5em;
+            margin-right: 0.3em;
             display: inline-block;
         }
     }
@@ -416,6 +416,12 @@ table {
         z-index: 14;
         margin: 2em auto;
         overflow: auto;
+        .popup-header {
+            color: var(--color-blue);
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 0.5em;
+        }
         .popup-content {
             * {
                 margin: 1em 0;
@@ -557,4 +563,8 @@ mark {
 .sort-buttons a.sort-btn.active {
     color: var(--color-light);
     font-weight: bold;
+}
+
+.sort-buttons .sort-separator {
+    padding: 0 0.2em;
 }

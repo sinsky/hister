@@ -19,29 +19,37 @@ help() {
 Commands
 ========
 help                 - Display help
-
+ 
 Dependencies
 ------------------
 install_js_deps      - Install or install frontend dependencies (required only for development)
-
+ 
 Tests
 -----
 run_unit_tests       - Run unit tests
-
+ 
 Build
 -----
+build                - Build main hister application
 build_addon          - Build addon
 build_addon_artifact - Build addon artifacts to distribute to addon stores
-
-========
-
-Execute 'go run hister.go' or 'go build && ./hister' for application related actions
-"
+ 
+ ========
+ 
+ Execute 'go run hister.go' or 'go build && ./hister' for application related actions
+ "
 	[ -z "$1" ] && exit 0 || exit 1
 }
 
+check_npm() {
+    if ! command -v npm >/dev/null 2>&1; then
+        echo "!!!!!Error: NPM IS NOT INSTALLED!!!!! Please install npm from https://nodejs.org/en/download"
+        exit 1
+    fi
+}
 
 install_js_deps() {
+    check_npm
     cd ext
     npm install cross-env
     npm i
@@ -52,7 +60,13 @@ run_unit_tests() {
     go test ./...
 }
 
+build() {
+    check_npm
+    go generate && go build
+}
+
 build_addon() {
+    check_npm
     echo "[!] Warning: The default manifest.json is for chrome browsers, overwrite it with manifest_ff.json for firefox"
     cd ext
     npm run build
