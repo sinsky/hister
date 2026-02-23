@@ -31,19 +31,6 @@ body::before {
     radial-gradient(circle at 80% 70%, rgba(142, 68, 173, 0.15) 0%, transparent 50%),
     radial-gradient(circle at 50% 50%, rgba(231, 76, 60, 0.1) 0%, transparent 50%);
 }
-body::after {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    background-image:
-    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(52, 152, 219, 0.03) 2px, rgba(52, 152, 219, 0.03) 4px),
-    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(142, 68, 173, 0.03) 2px, rgba(142, 68, 173, 0.03) 4px);
-    pointer-events: none;
-}
 a {
     color: #48dbfb;
 }
@@ -52,13 +39,17 @@ nav {
     background: rgba(255, 255, 255, 0.05);
     a {
         padding: 0 1em;
+        text-decoration: none;
+    }
+    a:hover {
+        text-decoration: underline;
     }
     margin: 0;
     padding: 0.5em 1em;
 }
 
 main {
-    max-width: 1200px;
+    max-width: min(70em, 100%);
     margin: 0 auto;
     padding: 1em;
     flex: 1 0 auto;
@@ -111,17 +102,6 @@ h2, h2 a {
     font-size: 2rem;
     color: var(--color-green);
     margin: 50px 0;
-}
-h2::after {
-    content: '';
-    position: absolute;
-    bottom: -15px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100px;
-    height: 4px;
-    background: linear-gradient(90deg, #3498db, #9b59b6);
-    border-radius: 2px;
 }
 h3, h4 {
     margin: 40px 10px;
@@ -177,7 +157,7 @@ hr {
     font-size: 0.5em;
 }
 .tagline {
-    font-size: 2rem;
+    font-size: 3rem;
     margin-bottom: 30px;
     background: linear-gradient(135deg, #3498db, #2ecc71, #f39c12);
     -webkit-background-clip: text;
@@ -230,15 +210,11 @@ hr {
 }
 
 .features {
-    background: linear-gradient(135deg, rgba(34, 36, 44, 0.95) 0%, rgba(44, 47, 56, 0.95) 100%);
+    background:  rgba(0, 0, 0, 0.25);
     border-radius: 20px;
     padding: 60px 40px;
     margin: 40px 0;
     border: 1px solid rgba(79, 75, 79, 0.5);
-    box-shadow:
-    0 10px 40px rgba(0,0,0,0.3),
-    inset 0 1px 0 rgba(255,255,255,0.05),
-    0 0 60px rgba(52, 152, 219, 0.1);
     position: relative;
 }
 
@@ -246,6 +222,7 @@ hr {
     background: linear-gradient(10deg, #3498db, #9b59b6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    font-size: 3em;
     background-clip: text;
     margin-top: 0 !important;
     text-align: center;
@@ -256,7 +233,7 @@ hr {
 
 .feature-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
     gap: 10px;
 }
 
@@ -265,7 +242,7 @@ hr {
     padding: 20px;
     border-radius: 15px;
     transition: all 0.3s ease;
-    background: rgba(52, 152, 219, 0.02);
+    background: rgba(82, 82, 149, 0.1);
 }
 .feature-item:hover {
     background: rgba(52, 152, 219, 0.08);
@@ -286,21 +263,10 @@ hr {
     position: relative;
     padding-bottom: 10px;
 }
-.feature-item h3::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 3px;
-    background: linear-gradient(90deg, #3498db, #9b59b6);
-    border-radius: 2px;
-}
 
 .feature-item p {
     font-size: 0.9em;
-    color: #95a5a6;
+    color: #b5b5b6;
 }
 
 .demo {
@@ -338,7 +304,7 @@ footer a:hover {
     }
 
     .tagline {
-        font-size: 1.2rem;
+        font-size: 2rem;
     }
 
     .features, .setup {
