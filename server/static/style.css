@@ -289,6 +289,10 @@ table {
     }
 }
 
+.results-header {
+    min-height: 3em;
+}
+
 .date-filters {
     input {
         width: auto;
