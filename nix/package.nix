@@ -13,7 +13,7 @@ buildGoModule (finalAttrs: {
 
   src = ../.;
 
-  vendorHash = "sha256-BoM5CN57UuuxCaf1myyQxUyT2N1uGy+IjpCvDJmfvAU=";
+  vendorHash = "sha256-Tnvr9TqP7BNGmZ+0wrEfi9FH6KteLVORH3qUFWjn02Q=";
 
   buildInputs = [ sqlite ];
 
