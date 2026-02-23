@@ -14,7 +14,7 @@ RUN go mod download
 # Install Node.js and npm for static asset build
 
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
-RUN source "$HOME/.nvm/nvm.sh" && nvm install 24
+RUN . "$HOME/.nvm/nvm.sh" && nvm install 24
 
 # Build static assets
 COPY . .
