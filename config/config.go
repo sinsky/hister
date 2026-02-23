@@ -145,7 +145,6 @@ func Load(filename string) (*Config, error) {
 	b, fn, err := readConfigFile(filename)
 	var c *Config
 	if err != nil {
-		log.Debug().Msg("No config file found, using default config")
 		c = CreateDefaultConfig()
 	} else {
 		c, err = parseConfig(b)
