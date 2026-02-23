@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"html"
 	"io"
 	"net/http"
 	"net/url"
@@ -29,6 +28,7 @@ import (
 	simpleHighlighter "github.com/blevesearch/bleve/v2/search/highlight/highlighter/simple"
 	"github.com/blevesearch/bleve/v2/search/query"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/microcosm-cc/bluemonday"
 	"github.com/rs/zerolog/log"
 )
 
@@ -76,6 +76,7 @@ var (
 	allFields           []string = []string{"url", "title", "text", "favicon", "html", "domain", "added"}
 	ErrSensitiveContent          = errors.New("document contains sensitive data")
 	sensitiveContentRe  *regexp.Regexp
+	sanitizer           *bluemonday.Policy
 )
 
 func Init(cfg *config.Config) error {
@@ -98,6 +99,10 @@ func Init(cfg *config.Config) error {
 	registry.RegisterHighlighter("ansi", invertedAnsiHighlighter)
 	registry.RegisterHighlighter("tui", tuiHighlighter)
 	return nil
+}
+
+func init() {
+	sanitizer = bluemonday.StrictPolicy()
 }
 
 func Reindex(idxPath, tmpIdxPath string, rules *config.Rules, skipSensitiveChecks bool) error {
@@ -286,7 +291,7 @@ func (d *Document) Process() error {
 	if err := d.extractHTML(); err != nil {
 		return err
 	}
-	d.Title = html.EscapeString(d.Title)
+	d.Title = sanitizer.Sanitize(d.Title)
 	d.processed = true
 	return nil
 }
