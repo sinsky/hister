@@ -450,7 +450,7 @@ func (m *tuiModel) renderStatusBar() string {
 	if m.connError != nil {
 		left += " - " + discStyle.Render(m.connError.Error())
 	}
-	right := "Press ? for help "
+	right := "Press F1 for help "
 
 	targetW := max(1, m.width-1)
 	pad := max(0, targetW-lipgloss.Width(left)-lipgloss.Width(right))
