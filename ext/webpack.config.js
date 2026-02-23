@@ -103,7 +103,6 @@ const addon = {
                         content = JSON.parse(content.toString());
                         content['version'] = process.env.npm_package_version;
                         content['background']['scripts'] = ['background.js'];
-                        content['chrome_settings_overrides']['search_provider']['is_default'] = true
                         content['content_security_policy'] = {
                             "extension_pages": "script-src 'self'"
                         };
