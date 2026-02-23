@@ -36,7 +36,7 @@ buildGoModule (finalAttrs: {
   meta = {
     description = "Web history on steroids - blazing fast, content-based search for visited websites";
     homepage = "https://github.com/asciimoo/hister";
-    license = lib.licenses.agpl3Only;
+    license = lib.licenses.agpl3Plus;
     maintainers = [ lib.maintainers.FlameFlag ];
     mainProgram = "hister";
     platforms = lib.platforms.unix;
