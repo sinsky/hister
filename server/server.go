@@ -339,7 +339,8 @@ func doSearch(query *indexer.Query, cfg *config.Config) (*indexer.Results, error
 	if oq != "" {
 		res.QuerySuggestion = model.GetQuerySuggestion(oq)
 	}
-	res.SearchDuration = fmt.Sprintf("%v", time.Since(start))
+	duration := float32(time.Since(start).Milliseconds()) / 1000.
+	res.SearchDuration = fmt.Sprintf("%.3f seconds", duration)
 	return res, nil
 }
 
