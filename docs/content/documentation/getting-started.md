@@ -9,7 +9,9 @@ layout = 'documentation'
 
 ### Option 1: Pre-built Binary
 
-1. Download the latest binary for your platform from the [releases page](https://github.com/asciimoo/hister/releases/latest)
+ 1. Download the binary for your platform:
+    - For stable versions: [Releases](https://github.com/asciimoo/hister/releases)
+    - For the latest development version: [Rolling Release (latest)](https://github.com/asciimoo/hister/releases/tag/latest)
 2. Make the binary executable:
    ```bash
    chmod +x hister

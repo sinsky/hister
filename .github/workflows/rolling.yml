@@ -1,0 +1,87 @@
+name: Rolling Release
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v6.2.0
+        with:
+          go-version: 'stable'
+
+      - name: Install cross-compilers
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu gcc-x86-64-linux-gnu mingw-w64
+
+      # We use 'build --snapshot' because GoReleaser won't let us "release" without a valid SemVer tag
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v7.0.0
+        with:
+          distribution: goreleaser
+          version: latest
+          args: build --snapshot --clean ${{ matrix.os == 'ubuntu-latest' && '--id=build_cgo_unix --id=build_cgo_windows' || '--id=build_cgo_darwin' }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          name: binaries-${{ matrix.os }}
+          path: dist/hister_*
+
+  release:
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v7.0.0
+        with:
+          path: dist/
+
+      - name: Force Update 'latest' Tag
+        run: |
+          git tag -f latest
+          git push origin latest --force
+
+      - name: Generate release body
+        id: release_body
+        run: |
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "Automated build from master." >> $GITHUB_OUTPUT
+          echo "Commit: ${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "Built on: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Update Latest Release
+        uses: softprops/action-gh-release@v2.5.0
+        with:
+          tag_name: latest
+          name: "Hister (Dev Build)"
+          body: ${{ steps.release_body.outputs.body }}
+          prerelease: true
+          make_latest: true
+          files: |
+            dist/**/hister_*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
