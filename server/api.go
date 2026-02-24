@@ -81,6 +81,22 @@ func init() {
 			Description:  "Save added document",
 		},
 		&Endpoint{
+			Name:         "Get document",
+			Path:         "/document",
+			Method:       GET,
+			CSRFRequired: false,
+			Handler:      serveGet,
+			Description:  "Get document by URL",
+			Args: []*EndpointArg{
+				&EndpointArg{
+					Name:        "URL",
+					Type:        "string",
+					Required:    true,
+					Description: "URL of the document",
+				},
+			},
+		},
+		&Endpoint{
 			Name:         "Rules",
 			Path:         "/rules",
 			Method:       GET,

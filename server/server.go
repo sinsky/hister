@@ -464,6 +464,17 @@ func serveRules(c *webContext) {
 	})
 }
 
+func serveGet(c *webContext) {
+	u := c.Request.URL.Query().Get("url")
+	doc := indexer.GetByURL(u)
+	if doc == nil {
+		serve500(c)
+		return
+	}
+	c.Response.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(c.Response).Encode(doc)
+}
+
 func serveReadable(c *webContext) {
 	u := c.Request.URL.Query().Get("url")
 	doc := indexer.GetByURL(u)
