@@ -10,7 +10,7 @@ let
   packageJson = builtins.fromJSON (builtins.readFile ../ext/package.json);
   npmDeps = fetchNpmDeps {
     src = ../server/static/js;
-    hash = "sha256-9ynzvzSX1pHwfB2Dm714ZkytjrFtIujtGtiwFHNcXAM=";
+    hash = "sha256-BupgGlAhzanFyjv43terHsUUjmAxFniwMSBLFi8shC0=";
   };
 in
 buildGoModule (finalAttrs: {
@@ -19,7 +19,8 @@ buildGoModule (finalAttrs: {
 
   src = ../.;
 
-  vendorHash = "sha256-Tnvr9TqP7BNGmZ+0wrEfi9FH6KteLVORH3qUFWjn02Q=";
+  vendorHash = "sha256-KEuZ+jKG3fMYymZr9fvwlTzLFVcYfUAofe8DOIqHUDY=";
+  proxyVendor = true;
 
   nativeBuildInputs = [ nodejs ];
 
