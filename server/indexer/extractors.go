@@ -126,5 +126,6 @@ func (e *readabilityExtractor) Extract(d *Document) error {
 	}
 	d.Text = buf.String()
 	d.Title = a.Title()
+	d.faviconURL = a.Favicon()
 	return nil
 }

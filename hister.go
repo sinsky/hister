@@ -30,6 +30,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const Version = "v0.4.0"
+
 var (
 	cliErrorStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("9")).Bold(true)
 	cliSuccessStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true)
@@ -39,15 +41,16 @@ var (
 )
 
 var (
-	cfgFile string
-	cfg     *config.Config
+	cfgFile   string
+	cfg       *config.Config
+	UserAgent = fmt.Sprintf("Mozilla/5.0 (compatible; Hister/%s; +https://hister.org/)", Version)
 )
 
 var rootCmd = &cobra.Command{
 	Use:     "hister",
 	Short:   "Web history on steroids",
 	Long:    ui.Banner,
-	Version: "v0.4.0",
+	Version: Version,
 	//Run: func(_ *cobra.Command, _ []string) {
 	//},
 }
@@ -129,7 +132,7 @@ var searchCmd = &cobra.Command{
 		}
 		qs := strings.Join(args, " ")
 		client := &http.Client{Timeout: 5 * time.Second}
-		req, err := http.NewRequest("GET", cfg.BaseURL("/search?q="+url.QueryEscape(qs)), nil)
+		req, err := newHisterRequest("GET", "/search?q="+url.QueryEscape(qs), nil)
 		if err != nil {
 			exit(1, "Failed to create request: "+err.Error())
 		}
@@ -184,11 +187,10 @@ var deleteCmd = &cobra.Command{
 				"url": {u},
 			}
 			client := &http.Client{Timeout: 5 * time.Second}
-			req, err := http.NewRequest("POST", cfg.BaseURL("/delete"), strings.NewReader(formData.Encode()))
+			req, err := newHisterRequest("POST", "/delete", strings.NewReader(formData.Encode()))
 			if err != nil {
 				exit(1, "Failed to create request: "+err.Error())
 			}
-			req.Header.Set("Origin", "hister://")
 			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 			resp, err := client.Do(req)
 			if err != nil {
@@ -442,7 +444,7 @@ func indexURL(u string) error {
 		log.Warn().Msg("URL must not be empty")
 		return nil
 	}
-	req, err := http.NewRequest("GET", u, nil)
+	req, err := newRequest("GET", u, nil)
 	if err != nil {
 		return errors.New(`failed to download file: ` + err.Error())
 	}
@@ -473,7 +475,7 @@ func indexURL(u string) error {
 		return errors.New(`failed to process document: ` + err.Error())
 	}
 	if d.Favicon == "" {
-		err := d.DownloadFavicon()
+		err := d.DownloadFavicon(UserAgent)
 		if err != nil {
 			log.Warn().Err(err).Str("URL", d.URL).Msg("failed to download favicon")
 		}
@@ -483,11 +485,10 @@ func indexURL(u string) error {
 		return errors.New(`failed to encode document to JSON: ` + err.Error())
 	}
 	histerClient := &http.Client{}
-	req, err = http.NewRequest("POST", cfg.BaseURL("/add"), bytes.NewBuffer(dj))
+	req, err = newHisterRequest("POST", "/add", bytes.NewBuffer(dj))
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
-	req.Header.Set("Origin", "hister://")
 	req.Header.Set("content-Type", "application/json")
 	resp, err := histerClient.Do(req)
 	if err != nil {
@@ -546,11 +547,30 @@ func importHistory(cmd *cobra.Command, args []string) {
 	}
 	defer rows.Close()
 	i := 1
+	client := &http.Client{}
 	for rows.Next() {
 		var u string
 		err = rows.Scan(&u)
 		if err != nil {
 			exit(1, "Failed to retreive URL: "+err.Error())
+		}
+		if !strings.HasPrefix(u, "http://") && !strings.HasPrefix(u, "https://") {
+			continue
+		}
+		req, err := newHisterRequest("GET", "/document?url="+url.QueryEscape(u), nil)
+		if err != nil {
+			log.Warn().Err(err).Str("URL", u).Msg("Failed to create request, skipping ")
+			continue
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Warn().Err(err).Str("URL", u).Msg("Failed to get info about URL, skipping")
+			continue
+		}
+		resp.Body.Close()
+		if resp.StatusCode == http.StatusOK {
+			// skip already added URLs
+			continue
 		}
 		fmt.Printf("[%d/%d] %s\n", i, count, u)
 		if err := indexURL(u); err != nil {
@@ -565,6 +585,24 @@ func importHistory(cmd *cobra.Command, args []string) {
 	//	vf = "last_visit_date"
 	//}
 	//q += fmt.Sprintf(" AND %s >= datetime('now', 'localtime', '-1 month')", vf)
+}
+
+func newRequest(method, u string, payload io.Reader) (*http.Request, error) {
+	req, err := http.NewRequest(method, u, payload)
+	if err != nil {
+		return req, err
+	}
+	req.Header.Set("User-Agent", UserAgent)
+	return req, nil
+}
+
+func newHisterRequest(method, u string, payload io.Reader) (*http.Request, error) {
+	req, err := newRequest(method, cfg.BaseURL(u), payload)
+	if err != nil {
+		return req, err
+	}
+	req.Header.Set("Origin", "hister://")
+	return req, nil
 }
 
 func main() {

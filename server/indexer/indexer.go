@@ -349,7 +349,7 @@ func (d *Document) extractHTML() error {
 	return Extract(d)
 }
 
-func (d *Document) DownloadFavicon() error {
+func (d *Document) DownloadFavicon(userAgent string) error {
 	if d.faviconURL == "" {
 		d.faviconURL = fullURL(d.URL, "/favicon.ico")
 	}
@@ -361,7 +361,7 @@ func (d *Document) DownloadFavicon() error {
 		Timeout: 10 * time.Second,
 	}
 	req, err := http.NewRequest("GET", d.faviconURL, nil)
-	req.Header.Set("User-Agent", "Hister")
+	req.Header.Set("User-Agent", userAgent)
 	if err != nil {
 		return err
 	}
@@ -372,7 +372,7 @@ func (d *Document) DownloadFavicon() error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return errors.New("invalid status code")
+		return fmt.Errorf("invalid status code (%d)", resp.StatusCode)
 	}
 
 	data, err := io.ReadAll(resp.Body)

@@ -89,7 +89,7 @@ func init() {
 			Description:  "Get document by URL",
 			Args: []*EndpointArg{
 				&EndpointArg{
-					Name:        "URL",
+					Name:        "url",
 					Type:        "string",
 					Required:    true,
 					Description: "URL of the document",
