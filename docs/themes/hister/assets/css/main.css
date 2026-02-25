@@ -52,7 +52,6 @@ main {
     max-width: min(70em, 100%);
     margin: 0 auto;
     padding: 1em;
-    flex: 1 0 auto;
 }
 
 strong {
