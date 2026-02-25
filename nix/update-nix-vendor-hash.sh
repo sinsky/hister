@@ -17,21 +17,21 @@ update_hash() {
     
     if echo "$output" | grep -q "go-modules.drv"; then
       echo "::notice::Updating vendorHash"
-      sed -i.bak "s|$EXPECTED_HASH|$GOT_HASH|g" "$PACKAGE_FILE"
-      rm -f "$PACKAGE_FILE.bak"
-      echo "updated"
     elif echo "$output" | grep -q "npm-deps.drv"; then
-      echo "::notice::Updating npmDeps hash"
-      sed -i.bak "s|$EXPECTED_HASH|$GOT_HASH|g" "$PACKAGE_FILE"
-      rm -f "$PACKAGE_FILE.bak"
-      echo "updated"
+      echo "::notice::Updating npmDepsHash"
+    else
+      echo "::warning::Unknown hash mismatch, updating anyway"
     fi
+
+    sed -i.bak "s|$EXPECTED_HASH|$GOT_HASH|g" "$PACKAGE_FILE"
+    rm -f "$PACKAGE_FILE.bak"
+    echo "updated"
   fi
 }
 
 echo "::notice::Running nix build to check for hash mismatches..."
 
-# nix hash
+# Attempt 1: typically catches npmDepsHash or vendorHash mismatch
 echo "::group::Build attempt 1"
 OUTPUT=$(nix build .#hister 2>&1 || true)
 echo "$OUTPUT"
@@ -39,7 +39,7 @@ echo "::endgroup::"
 
 RESULT1=$(update_hash "$OUTPUT" "1")
 
-# npm hash
+# Attempt 2: catches the remaining hash if both changed
 echo "::group::Build attempt 2"
 OUTPUT=$(nix build .#hister 2>&1 || true)
 echo "$OUTPUT"
