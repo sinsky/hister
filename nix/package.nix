@@ -1,47 +1,55 @@
 {
   lib,
   buildGoModule,
+  buildNpmPackage,
   sqlite,
-  fetchNpmDeps,
-  nodejs,
+  pkg-config,
   histerRev ? "unknown",
 }:
 let
-  packageJson = builtins.fromJSON (builtins.readFile ../ext/package.json);
-  npmDeps = fetchNpmDeps {
+  version = (builtins.fromJSON (builtins.readFile ../ext/package.json)).version;
+
+  frontend = buildNpmPackage {
+    pname = "hister-frontend";
+    inherit version;
     src = ../server/static/js;
-    hash = "sha256-BupgGlAhzanFyjv43terHsUUjmAxFniwMSBLFi8shC0=";
+    npmDepsHash = "sha256-BupgGlAhzanFyjv43terHsUUjmAxFniwMSBLFi8shC0=";
+    dontNpmBuild = false;
+    installPhase = ''
+      runHook preInstall
+      mkdir -p $out
+      cp -r dist/* $out/
+      runHook postInstall
+    '';
   };
 in
 buildGoModule (finalAttrs: {
   pname = "hister";
-  version = packageJson.version;
+  inherit version;
 
-  src = ../.;
+  src = lib.fileset.toSource {
+    root = ../.;
+    fileset = lib.fileset.unions [
+      ../go.mod
+      ../go.sum
+      ../hister.go
+      ../server
+      ../config
+      ../ui
+    ];
+  };
 
   vendorHash = "sha256-KEuZ+jKG3fMYymZr9fvwlTzLFVcYfUAofe8DOIqHUDY=";
   proxyVendor = true;
 
-  nativeBuildInputs = [ nodejs ];
-
+  nativeBuildInputs = [ pkg-config ];
   buildInputs = [ sqlite ];
 
-  postPatch = "";
+  tags = [ "libsqlite3" ];
 
   preBuild = ''
-    # Build npm frontend
-    # In goModules derivation, this runs but doesn't affect the build
-    # In main derivation, this creates dist files before Go compilation
-    cd server/static/js
-    mkdir -p $TMPDIR/npm-cache
-    cp -r ${npmDeps}/* $TMPDIR/npm-cache/
-    export NPM_CONFIG_CACHE=$TMPDIR/npm-cache
-    npm ci --offline
-    npm run build
-    cd ../..
-
-    export CGO_CFLAGS="-I${sqlite.dev}/include"
-    export CGO_LDFLAGS="-L${sqlite.out}/lib -lsqlite3"
+    mkdir -p server/static/js/dist
+    cp -r ${frontend}/* server/static/js/dist/
   '';
 
   ldflags = [
@@ -53,10 +61,8 @@ buildGoModule (finalAttrs: {
 
   subPackages = [ "." ];
 
-  doCheck = false;
-
   passthru = {
-    inherit npmDeps;
+    inherit frontend;
   };
 
   meta = {

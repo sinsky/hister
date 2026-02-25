@@ -51,7 +51,7 @@ jobs:
           commit-message: "[chore] update Nix hashes for Go/NPM changes"
           title: "Update Nix hashes"
           body: |
-            [chore] update nix/package.nix hashes (vendorHash and/or npmDeps)
+            [chore] update nix/package.nix hashes (vendorHash and/or npmDepsHash)
             
             Triggered by: ${{ github.repository }}@${{ github.sha }}
           delete-branch: true
