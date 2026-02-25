@@ -173,7 +173,7 @@ func (l *Lexer) readWord() (Token, error) {
 	var builder strings.Builder
 
 	quote := false
-	for quote || (!unicode.IsSpace(l.char) && l.char != 0) {
+	for (quote || !unicode.IsSpace(l.char)) && l.char != 0 {
 		if l.char == '"' {
 			quote = !quote
 		}
