@@ -248,6 +248,7 @@ export interface APIRequestOptions {
   params?: APIRequestParams;
   callback?: (response: Response) => void;
   csrfToken?: string;
+  csrfCallback?: (token: string) => void;
 }
 
 export function apiRequest(options: APIRequestOptions): void {
@@ -263,7 +264,9 @@ export function apiRequest(options: APIRequestOptions): void {
   };
 
   fetch(options.url, params).then((r) => {
-    if (r.headers.get("X-CSRF-Token") && options.csrfToken !== undefined) {
+    const newToken = r.headers.get("X-CSRF-Token");
+    if (newToken && options.csrfToken !== undefined) {
+      options.csrfCallback?.(newToken);
     }
     options.callback?.(r);
   });

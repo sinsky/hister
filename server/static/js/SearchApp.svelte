@@ -144,6 +144,7 @@
         body: JSON.stringify({ url, title, query: queryStr, delete: remove })
       },
       csrfToken: config.csrf,
+      csrfCallback: (tok) => { config.csrf = tok; },
       callback
     });
   }
@@ -160,6 +161,7 @@
       url: '/delete',
       params: { method: 'POST', body: data },
       csrfToken: config.csrf,
+      csrfCallback: (tok) => { config.csrf = tok; },
       callback: () => {
         lastResults = {
           ...lastResults,
@@ -188,6 +190,7 @@
     apiRequest({
       url: `/readable?url=${encodeURIComponent(url)}`,
       csrfToken: config.csrf,
+      csrfCallback: (tok) => { config.csrf = tok; },
       callback: resp => {
         resp.json().then(data => {
           popupTitle = data.title;
@@ -245,7 +248,7 @@
 
   function autocompleteQuery(e) {
     if (e) e.preventDefault();
-    if (document.activeElement === inputEl && query !== autocomplete) {
+    if (document.activeElement === inputEl && autocomplete && query !== autocomplete) {
       query = autocomplete;
       sendQuery(query);
     }
