@@ -19,11 +19,23 @@ The server will start on `http://127.0.0.1:4433` and be accessible only from you
 
 ## Running on a Different Host
 
-If you want to access Hister from other devices on your network or run it on a server, you need to configure two settings:
+If you want to access Hister from other devices on your network or run it on a server, you need to configure two settings.
+
+### Generate Configuration File
+
+You can generate a default configuration file using the `create-config` command:
+
+```bash
+./hister create-config config.yml
+```
+
+If no filename is provided, it will print the default configuration to `stdout`.
+
+> **Note**: You can also configure Hister entirely using **Environment Variables**, which is often easier for server setups. See the [Configuration via Environment Variables](#configuration-via-environment-variables) section below for details.
 
 ### Bind to All Network Interfaces
 
-Create or edit your configuration file at `~/.config/hister/config.yml`:
+Edit your configuration file (e.g., `~/.config/hister/config.yml`):
 
 ```yaml
 server:
@@ -113,6 +125,14 @@ All configuration options can be set using environment variables with the prefix
 ## Docker Setup
 
 Hister provides official Docker images for both AMD64 and ARM64 architectures. Using environment variables is the preferred way to configure Hister in Docker.
+
+### Generating Configuration via Docker
+
+If you prefer using a configuration file instead of environment variables, you can generate a default one using Docker:
+
+```bash
+docker run --rm ghcr.io/asciimoo/hister:latest create-config > config.yml
+```
 
 ### Basic Docker Compose
 
